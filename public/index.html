@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>크로스핏 레벤 존다 챌린지</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 상단 고정 헤더 -->
+    <header class="top-header">
+      <div class="header-row-1">
+        <div class="brand-wrap">
+          <span class="brand-badge">LEBEN</span>
+          <span class="brand-title" id="headerChallengeTitle">레벤 존다 챌린지</span>
+        </div>
+        <button class="user-pill-btn" id="btnSwitchUser" type="button">
+          <span id="currentUserBadge">👤 참가자 선택</span>
+          <span>▾</span>
+        </button>
+      </div>
+      <div class="header-row-2">
+        <div class="date-nav">
+          <button type="button" id="btnPrevDate" title="이전 날짜">◀</button>
+          <input type="date" id="datePicker" />
+          <button type="button" id="btnNextDate" title="다음 날짜">▶</button>
+          <button type="button" id="btnTodayDate" style="color:#fdba74;font-size:12px;">오늘</button>
+        </div>
+        <div class="deadline-timer" id="midnightCountdown">
+          ⏰ 밤 12시 마감까지 계산중...
+        </div>
+      </div>
+    </header>
+
+    <!-- 메인 뷰 컨테이너 -->
+    <main class="main-content" id="mainView"></main>
+
+    <!-- 하단 탭 네비게이션 -->
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <button type="button" class="nav-tab active" data-tab="diet">
+          <span class="nav-icon">🍽️</span>
+          <span>식단·블록</span>
+        </button>
+        <button type="button" class="nav-tab" data-tab="share">
+          <span class="nav-icon">📤</span>
+          <span>카페·단톡공유</span>
+        </button>
+        <button type="button" class="nav-tab" data-tab="teams">
+          <span class="nav-icon">👥</span>
+          <span>조별현황(5조)</span>
+        </button>
+        <button type="button" class="nav-tab" data-tab="penalty">
+          <span class="nav-icon">🏋️</span>
+          <span>미션·패널티</span>
+        </button>
+        <button type="button" class="nav-tab" data-tab="admin">
+          <span class="nav-icon">⚙️</span>
+          <span>코치관리</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 참가자 선택 & 4자리 PIN 모달 -->
+  <div class="modal-backdrop" id="userModal" style="display:none;">
+    <div class="modal-card" id="userModalContent"></div>
+  </div>
+
+  <!-- 토스트 알림 -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/card-generator.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

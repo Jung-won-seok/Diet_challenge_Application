@@ -1,0 +1,13 @@
+{
+  "name": "leben-zonda-challenge",
+  "version": "1.0.0",
+  "description": "크로스핏 레벤 존다(Zone Diet) 챌린지 모바일 웹앱 (식단 블록 기록, 조별 현황, 카페/단톡 공유 카드, 패널티 관리)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

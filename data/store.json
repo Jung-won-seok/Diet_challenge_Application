@@ -1,0 +1,495 @@
+{
+  "settings": {
+    "challengeName": "크로스핏 레벤 존다 챌린지",
+    "boxName": "CrossFit LEBEN",
+    "startDate": "2026-10-19",
+    "endDate": "2026-11-15",
+    "penaltyUnitAmount": 10000,
+    "maxPenaltyCount": 10,
+    "adminPin": "0000",
+    "cafeUrl": "https://cafe.naver.com/",
+    "weeklyMission": {
+      "weekLabel": "2주차 주간 미션",
+      "title": "로잉 2,000m 타기 또는 버피 100개 완주",
+      "description": "일요일 밤 12시 전까지 로잉 2,000m 기록 화면 또는 버피 100개 완료 인증을 등록해주세요. 주간 미션 미이행 시 패널티 1회(1만원)가 부여됩니다.",
+      "deadlineDay": "일요일 24:00 마감"
+    }
+  },
+  "participants": [
+    {
+      "id": "u1",
+      "name": "김레벤",
+      "team": 1,
+      "role": "조장",
+      "targetBlocks": 14,
+      "pin": "1234"
+    },
+    {
+      "id": "u2",
+      "name": "이존다",
+      "team": 1,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u3",
+      "name": "박바벨",
+      "team": 1,
+      "role": "조원",
+      "targetBlocks": 14,
+      "pin": "1234"
+    },
+    {
+      "id": "u4",
+      "name": "최와드",
+      "team": 1,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u5",
+      "name": "정스내치",
+      "team": 2,
+      "role": "조장",
+      "targetBlocks": 15,
+      "pin": "1234"
+    },
+    {
+      "id": "u6",
+      "name": "강버피",
+      "team": 2,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u7",
+      "name": "조케틀벨",
+      "team": 2,
+      "role": "조원",
+      "targetBlocks": 13,
+      "pin": "1234"
+    },
+    {
+      "id": "u8",
+      "name": "윤풀업",
+      "team": 2,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u9",
+      "name": "장클린",
+      "team": 3,
+      "role": "조장",
+      "targetBlocks": 14,
+      "pin": "1234"
+    },
+    {
+      "id": "u10",
+      "name": "임로잉",
+      "team": 3,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u11",
+      "name": "한박스",
+      "team": 3,
+      "role": "조원",
+      "targetBlocks": 12,
+      "pin": "1234"
+    },
+    {
+      "id": "u12",
+      "name": "오더블",
+      "team": 3,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u13",
+      "name": "서머슬업",
+      "team": 4,
+      "role": "조장",
+      "targetBlocks": 15,
+      "pin": "1234"
+    },
+    {
+      "id": "u14",
+      "name": "신월볼",
+      "team": 4,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u15",
+      "name": "권데드",
+      "team": 4,
+      "role": "조원",
+      "targetBlocks": 14,
+      "pin": "1234"
+    },
+    {
+      "id": "u16",
+      "name": "황스쿼트",
+      "team": 4,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u17",
+      "name": "안쓰러스터",
+      "team": 5,
+      "role": "조장",
+      "targetBlocks": 14,
+      "pin": "1234"
+    },
+    {
+      "id": "u18",
+      "name": "송토투바",
+      "team": 5,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    },
+    {
+      "id": "u19",
+      "name": "류핸푸",
+      "team": 5,
+      "role": "조원",
+      "targetBlocks": 13,
+      "pin": "1234"
+    },
+    {
+      "id": "u20",
+      "name": "홍어썰트",
+      "team": 5,
+      "role": "조원",
+      "targetBlocks": 11,
+      "pin": "1234"
+    }
+  ],
+  "dailyLogs": [
+    {
+      "id": "log_u1_2026-10-27",
+      "userId": "u1",
+      "date": "2026-10-27",
+      "kakaoReported": true,
+      "kakaoReportedAt": "2026-10-27T20:15:00+09:00",
+      "cafePosted": true,
+      "cafePostedAt": "2026-10-27T20:18:00+09:00",
+      "meals": [
+        {
+          "id": "m1",
+          "type": "아침",
+          "time": "08:10",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "닭가슴살 120g, 고구마 150g, 아몬드 12알",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f766e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23115e59%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%97%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%95%84%EC%B9%A8%20%EC%A1%B4%EB%8B%A4%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4%20100g%20%C2%B7%20%EA%B3%A0%EA%B5%AC%EB%A7%88%20120g%20%C2%B7%20%EC%95%84%EB%AA%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m2",
+          "type": "점심",
+          "time": "12:30",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "소고기 우둔살 도시락 + 현미밥 + 샐러드",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231d4ed8%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%8D%B1%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%90%EC%8B%AC%20%ED%81%B4%EB%A6%B0%20%EB%8F%84%EC%8B%9C%EB%9D%BD%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%86%8C%EA%B3%A0%EA%B8%B0%20%EC%9A%B0%EB%91%94%EC%82%B4%20%C2%B7%20%ED%98%84%EB%AF%B8%EB%B0%A5%20%C2%B7%20%EC%98%AC%EB%A6%AC%EB%B8%8C%EC%9C%A0%20%EC%83%90%EB%9F%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m3",
+          "type": "저녁",
+          "time": "18:50",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "연어 스테이크 + 단호박 + 아보카도",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234338ca%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23312e81%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%80%EB%85%81%20%EC%9A%B4%EB%8F%99%20%ED%9B%84%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%97%B0%EC%96%B4%20%EC%8A%A4%ED%85%8C%EC%9D%B4%ED%81%AC%20%C2%B7%20%EA%B5%AC%EC%9A%B4%20%EB%8B%A8%ED%98%B8%EB%B0%95%20%C2%B7%20%EC%95%84%EB%B3%B4%EC%B9%B4%EB%8F%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m4",
+          "type": "간식",
+          "time": "20:00",
+          "carb": 2,
+          "protein": 2,
+          "fat": 2,
+          "memo": "프로틴 쉐이크 + 사과 반쪽 + 견과류",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23b45309%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2378350f%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%AB%90%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EA%B0%84%EC%8B%9D%20%EB%B8%94%EB%A1%9D%20%EB%B3%B4%EC%B6%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%AC%B4%EA%B0%80%EB%8B%B9%20%EA%B7%B8%EB%A6%AD%EC%9A%94%EA%B1%B0%ED%8A%B8%20%C2%B7%20%EB%B8%94%EB%A3%A8%EB%B2%A0%EB%A6%AC%20%C2%B7%20%ED%98%B8%EB%91%90%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        }
+      ]
+    },
+    {
+      "id": "log_u2_2026-10-27",
+      "userId": "u2",
+      "date": "2026-10-27",
+      "kakaoReported": true,
+      "kakaoReportedAt": "2026-10-27T21:05:00+09:00",
+      "cafePosted": false,
+      "cafePostedAt": null,
+      "meals": [
+        {
+          "id": "m5",
+          "type": "아침",
+          "time": "08:40",
+          "carb": 3,
+          "protein": 3,
+          "fat": 3,
+          "memo": "계란 3개 + 오트밀 + 땅콩버터",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f766e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23115e59%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%97%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%95%84%EC%B9%A8%20%EC%A1%B4%EB%8B%A4%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4%20100g%20%C2%B7%20%EA%B3%A0%EA%B5%AC%EB%A7%88%20120g%20%C2%B7%20%EC%95%84%EB%AA%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m6",
+          "type": "점심",
+          "time": "13:00",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "닭가슴살 포케 (소스 제외)",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231d4ed8%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%8D%B1%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%90%EC%8B%AC%20%ED%81%B4%EB%A6%B0%20%EB%8F%84%EC%8B%9C%EB%9D%BD%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%86%8C%EA%B3%A0%EA%B8%B0%20%EC%9A%B0%EB%91%94%EC%82%B4%20%C2%B7%20%ED%98%84%EB%AF%B8%EB%B0%A5%20%C2%B7%20%EC%98%AC%EB%A6%AC%EB%B8%8C%EC%9C%A0%20%EC%83%90%EB%9F%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m7",
+          "type": "저녁",
+          "time": "19:20",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "돼지 앞다리살 수육 + 쌈채소 + 현미밥",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234338ca%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23312e81%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%80%EB%85%81%20%EC%9A%B4%EB%8F%99%20%ED%9B%84%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%97%B0%EC%96%B4%20%EC%8A%A4%ED%85%8C%EC%9D%B4%ED%81%AC%20%C2%B7%20%EA%B5%AC%EC%9A%B4%20%EB%8B%A8%ED%98%B8%EB%B0%95%20%C2%B7%20%EC%95%84%EB%B3%B4%EC%B9%B4%EB%8F%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        }
+      ]
+    },
+    {
+      "id": "log_u3_2026-10-27",
+      "userId": "u3",
+      "date": "2026-10-27",
+      "kakaoReported": false,
+      "kakaoReportedAt": null,
+      "cafePosted": false,
+      "cafePostedAt": null,
+      "meals": [
+        {
+          "id": "m8",
+          "type": "아침",
+          "time": "09:00",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "닭가슴살 샐러드 + 호밀빵",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f766e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23115e59%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%97%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%95%84%EC%B9%A8%20%EC%A1%B4%EB%8B%A4%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4%20100g%20%C2%B7%20%EA%B3%A0%EA%B5%AC%EB%A7%88%20120g%20%C2%B7%20%EC%95%84%EB%AA%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m9",
+          "type": "점심",
+          "time": "12:40",
+          "carb": 6,
+          "protein": 5,
+          "fat": 6,
+          "memo": "점심 회식 삼겹살 + 냉면 조금",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231d4ed8%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%8D%B1%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%90%EC%8B%AC%20%ED%81%B4%EB%A6%B0%20%EB%8F%84%EC%8B%9C%EB%9D%BD%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%86%8C%EA%B3%A0%EA%B8%B0%20%EC%9A%B0%EB%91%94%EC%82%B4%20%C2%B7%20%ED%98%84%EB%AF%B8%EB%B0%A5%20%C2%B7%20%EC%98%AC%EB%A6%AC%EB%B8%8C%EC%9C%A0%20%EC%83%90%EB%9F%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m10",
+          "type": "저녁",
+          "time": "19:30",
+          "carb": 5,
+          "protein": 4,
+          "fat": 5,
+          "memo": "저녁 일반식 (목표 14블록 초과!)",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234338ca%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23312e81%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%80%EB%85%81%20%EC%9A%B4%EB%8F%99%20%ED%9B%84%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%97%B0%EC%96%B4%20%EC%8A%A4%ED%85%8C%EC%9D%B4%ED%81%AC%20%C2%B7%20%EA%B5%AC%EC%9A%B4%20%EB%8B%A8%ED%98%B8%EB%B0%95%20%C2%B7%20%EC%95%84%EB%B3%B4%EC%B9%B4%EB%8F%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        }
+      ]
+    },
+    {
+      "id": "log_u5_2026-10-27",
+      "userId": "u5",
+      "date": "2026-10-27",
+      "kakaoReported": true,
+      "kakaoReportedAt": "2026-10-27T19:50:00+09:00",
+      "cafePosted": true,
+      "cafePostedAt": "2026-10-27T19:55:00+09:00",
+      "meals": [
+        {
+          "id": "m11",
+          "type": "아침",
+          "time": "07:50",
+          "carb": 5,
+          "protein": 5,
+          "fat": 5,
+          "memo": "아침 든든하게 5블록 정석 식단",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f766e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23115e59%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%97%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%95%84%EC%B9%A8%20%EC%A1%B4%EB%8B%A4%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4%20100g%20%C2%B7%20%EA%B3%A0%EA%B5%AC%EB%A7%88%20120g%20%C2%B7%20%EC%95%84%EB%AA%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m12",
+          "type": "점심",
+          "time": "12:20",
+          "carb": 5,
+          "protein": 5,
+          "fat": 5,
+          "memo": "점심 우둔살 볶음밥 5블록",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231d4ed8%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%8D%B1%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%90%EC%8B%AC%20%ED%81%B4%EB%A6%B0%20%EB%8F%84%EC%8B%9C%EB%9D%BD%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%86%8C%EA%B3%A0%EA%B8%B0%20%EC%9A%B0%EB%91%94%EC%82%B4%20%C2%B7%20%ED%98%84%EB%AF%B8%EB%B0%A5%20%C2%B7%20%EC%98%AC%EB%A6%AC%EB%B8%8C%EC%9C%A0%20%EC%83%90%EB%9F%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m13",
+          "type": "저녁",
+          "time": "18:40",
+          "carb": 5,
+          "protein": 5,
+          "fat": 5,
+          "memo": "저녁 닭안심 구이 5블록 클리어",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234338ca%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23312e81%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%80%EB%85%81%20%EC%9A%B4%EB%8F%99%20%ED%9B%84%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%97%B0%EC%96%B4%20%EC%8A%A4%ED%85%8C%EC%9D%B4%ED%81%AC%20%C2%B7%20%EA%B5%AC%EC%9A%B4%20%EB%8B%A8%ED%98%B8%EB%B0%95%20%C2%B7%20%EC%95%84%EB%B3%B4%EC%B9%B4%EB%8F%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        }
+      ]
+    },
+    {
+      "id": "log_u6_2026-10-27",
+      "userId": "u6",
+      "date": "2026-10-27",
+      "kakaoReported": true,
+      "kakaoReportedAt": "2026-10-27T20:30:00+09:00",
+      "cafePosted": true,
+      "cafePostedAt": "2026-10-27T20:32:00+09:00",
+      "meals": [
+        {
+          "id": "m14",
+          "type": "아침",
+          "time": "08:30",
+          "carb": 3.5,
+          "protein": 3.5,
+          "fat": 3.5,
+          "memo": "그릭요거트 + 닭가슴살 소시지",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230f766e%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23115e59%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%97%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%95%84%EC%B9%A8%20%EC%A1%B4%EB%8B%A4%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EB%8B%AD%EA%B0%80%EC%8A%B4%EC%82%B4%20100g%20%C2%B7%20%EA%B3%A0%EA%B5%AC%EB%A7%88%20120g%20%C2%B7%20%EC%95%84%EB%AA%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m15",
+          "type": "점심",
+          "time": "12:50",
+          "carb": 4,
+          "protein": 4,
+          "fat": 4,
+          "memo": "현미밥 100g + 연어포케",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%231d4ed8%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e3a8a%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%8D%B1%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%90%EC%8B%AC%20%ED%81%B4%EB%A6%B0%20%EB%8F%84%EC%8B%9C%EB%9D%BD%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%86%8C%EA%B3%A0%EA%B8%B0%20%EC%9A%B0%EB%91%94%EC%82%B4%20%C2%B7%20%ED%98%84%EB%AF%B8%EB%B0%A5%20%C2%B7%20%EC%98%AC%EB%A6%AC%EB%B8%8C%EC%9C%A0%20%EC%83%90%EB%9F%AC%EB%93%9C%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        },
+        {
+          "id": "m16",
+          "type": "저녁",
+          "time": "19:10",
+          "carb": 3.5,
+          "protein": 3.5,
+          "fat": 3.5,
+          "memo": "고구마 + 계란흰자 + 아몬드",
+          "photoDataUrl": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22360%22%20viewBox%3D%220%200%20480%20360%22%3E%0A%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%234338ca%22%2F%3E%0A%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23312e81%22%2F%3E%0A%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%3Crect%20width%3D%22480%22%20height%3D%22360%22%20rx%3D%2224%22%20fill%3D%22url(%23g)%22%2F%3E%0A%20%20%20%20%3Ccircle%20cx%3D%22240%22%20cy%3D%22145%22%20r%3D%2274%22%20fill%3D%22rgba(255%2C255%2C255%2C0.14)%22%2F%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22168%22%20font-size%3D%2268%22%20text-anchor%3D%22middle%22%3E%F0%9F%A5%A9%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22258%22%20font-family%3D%22sans-serif%22%20font-size%3D%2226%22%20font-weight%3D%22bold%22%20fill%3D%22%23ffffff%22%20text-anchor%3D%22middle%22%3E%EC%A0%80%EB%85%81%20%EC%9A%B4%EB%8F%99%20%ED%9B%84%20%EC%8B%9D%EB%8B%A8%3C%2Ftext%3E%0A%20%20%20%20%3Ctext%20x%3D%22240%22%20y%3D%22294%22%20font-family%3D%22sans-serif%22%20font-size%3D%2218%22%20fill%3D%22rgba(255%2C255%2C255%2C0.85)%22%20text-anchor%3D%22middle%22%3E%EC%97%B0%EC%96%B4%20%EC%8A%A4%ED%85%8C%EC%9D%B4%ED%81%AC%20%C2%B7%20%EA%B5%AC%EC%9A%B4%20%EB%8B%A8%ED%98%B8%EB%B0%95%20%C2%B7%20%EC%95%84%EB%B3%B4%EC%B9%B4%EB%8F%84%3C%2Ftext%3E%0A%20%20%3C%2Fsvg%3E"
+        }
+      ]
+    }
+  ],
+  "missionLogs": [
+    {
+      "id": "ms1",
+      "userId": "u1",
+      "weekLabel": "2주차 주간 미션",
+      "date": "2026-10-27",
+      "memo": "로잉 2,000m 7분 24초 완료! 댐퍼 5 세팅",
+      "createdAt": "2026-10-27T18:10:00+09:00"
+    },
+    {
+      "id": "ms2",
+      "userId": "u2",
+      "weekLabel": "2주차 주간 미션",
+      "date": "2026-10-27",
+      "memo": "버피 100개 6분 52초 숨차 죽는줄 알았습니다🔥",
+      "createdAt": "2026-10-27T19:00:00+09:00"
+    },
+    {
+      "id": "ms3",
+      "userId": "u5",
+      "weekLabel": "2주차 주간 미션",
+      "date": "2026-10-26",
+      "memo": "수업 끝나고 로잉 2,000m 7분 08초 인증 완료",
+      "createdAt": "2026-10-26T21:15:00+09:00"
+    },
+    {
+      "id": "ms4",
+      "userId": "u9",
+      "weekLabel": "2주차 주간 미션",
+      "date": "2026-10-26",
+      "memo": "오픈짐 버피 100개 완주 인증!",
+      "createdAt": "2026-10-26T20:40:00+09:00"
+    },
+    {
+      "id": "ms5",
+      "userId": "u13",
+      "weekLabel": "2주차 주간 미션",
+      "date": "2026-10-27",
+      "memo": "로잉 2000m 7분 35초 인증합니다",
+      "createdAt": "2026-10-27T17:30:00+09:00"
+    }
+  ],
+  "penalties": [
+    {
+      "id": "p1",
+      "userId": "u3",
+      "date": "2026-10-25",
+      "type": "OVER_BLOCK",
+      "reason": "하루 목표 블록 초과 섭취 (탄수화물 16.5 / 목표 14블록)",
+      "amount": 10000,
+      "createdAt": "2026-10-25T23:59:00+09:00"
+    },
+    {
+      "id": "p2",
+      "userId": "u4",
+      "date": "2026-10-26",
+      "type": "NO_CAFE",
+      "reason": "밤 12시 전 네이버 카페 식단 게시글 미작성 (12:18 지각 업로드)",
+      "amount": 10000,
+      "createdAt": "2026-10-26T23:59:00+09:00"
+    },
+    {
+      "id": "p3",
+      "userId": "u8",
+      "date": "2026-10-25",
+      "type": "NO_KAKAO",
+      "reason": "밤 12시 전 2조 단톡방 식단 미보고",
+      "amount": 10000,
+      "createdAt": "2026-10-25T23:59:00+09:00"
+    },
+    {
+      "id": "p4",
+      "userId": "u8",
+      "date": "2026-10-26",
+      "type": "NO_MISSION",
+      "reason": "1주차 주간 미션 운동 미수행",
+      "amount": 10000,
+      "createdAt": "2026-10-26T23:59:00+09:00"
+    },
+    {
+      "id": "p5",
+      "userId": "u12",
+      "date": "2026-10-26",
+      "type": "OVER_BLOCK",
+      "reason": "하루 목표 블록 초과 섭취 (지방 14 / 목표 11블록)",
+      "amount": 10000,
+      "createdAt": "2026-10-26T23:59:00+09:00"
+    },
+    {
+      "id": "p6",
+      "userId": "u16",
+      "date": "2026-10-26",
+      "type": "NO_CAFE",
+      "reason": "밤 12시 전 네이버 카페 식단 인증 미작성",
+      "amount": 10000,
+      "createdAt": "2026-10-26T23:59:00+09:00"
+    }
+  ]
+}
