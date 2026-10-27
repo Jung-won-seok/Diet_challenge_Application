@@ -14,19 +14,31 @@ function getKstDateString(offsetDays = 0) {
   return kstTime.toISOString().slice(0, 10);
 }
 
-function createSampleFoodSvgDataUrl(title, subtitle, bgStart, bgEnd, emoji) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${bgStart}"/>
-        <stop offset="100%" stop-color="${bgEnd}"/>
-      </linearGradient>
-    </defs>
-    <rect width="480" height="360" rx="24" fill="url(#g)"/>
-    <circle cx="240" cy="145" r="74" fill="rgba(255,255,255,0.14)"/>
-    <text x="240" y="168" font-size="68" text-anchor="middle">${emoji}</text>
-    <text x="240" y="258" font-family="sans-serif" font-size="26" font-weight="bold" fill="#ffffff" text-anchor="middle">${title}</text>
-    <text x="240" y="294" font-family="sans-serif" font-size="18" fill="rgba(255,255,255,0.85)" text-anchor="middle">${subtitle}</text>
+function createSampleFoodSvgDataUrl(mealLabel, menuTitle, macroTag, accentColor, subAccent) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+    <rect width="600" height="450" fill="#18191C"/>
+    <!-- Subtle table surface texture -->
+    <circle cx="300" cy="210" r="168" fill="#23252A"/>
+    <circle cx="300" cy="210" r="144" fill="#F7F7F5" stroke="#E4E4E0" stroke-width="4"/>
+    <!-- Zone Diet Plate Divider Lines (40:30:30) -->
+    <line x1="300" y1="66" x2="300" y2="354" stroke="#E5E5E0" stroke-width="2" stroke-dasharray="4 4"/>
+    <line x1="300" y1="210" x2="444" y2="210" stroke="#E5E5E0" stroke-width="2" stroke-dasharray="4 4"/>
+    <!-- Plate food abstract shapes -->
+    <circle cx="232" cy="185" r="46" fill="${accentColor}" opacity="0.88"/>
+    <circle cx="242" cy="256" r="34" fill="#4D7C5D" opacity="0.85"/>
+    <rect x="322" y="128" width="68" height="54" rx="22" fill="${subAccent}" opacity="0.9"/>
+    <circle cx="356" cy="264" r="36" fill="#D9A05B" opacity="0.9"/>
+    <circle cx="332" cy="248" r="12" fill="#7A5C3E"/>
+    <circle cx="372" cy="278" r="10" fill="#7A5C3E"/>
+    <!-- Top Label Pill -->
+    <rect x="28" y="26" width="96" height="32" rx="16" fill="rgba(255,255,255,0.1)"/>
+    <text x="76" y="47" font-family="Pretendard, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.5">${mealLabel}</text>
+    <!-- Macro Tag Pill -->
+    <rect x="444" y="26" width="128" height="32" rx="16" fill="#C8F904"/>
+    <text x="508" y="47" font-family="Pretendard, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#111315" text-anchor="middle">${macroTag}</text>
+    <!-- Bottom Overlay Bar -->
+    <rect x="0" y="376" width="600" height="74" fill="rgba(17,19,21,0.86)"/>
+    <text x="32" y="420" font-family="Pretendard, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#F4F5F7">${menuTitle}</text>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
@@ -64,10 +76,10 @@ function createInitialData() {
     { id: 'u20', name: '홍어썰트', team: 5, role: '조원', targetBlocks: 11, pin: '1234' }
   ];
 
-  const sampleImg1 = createSampleFoodSvgDataUrl('아침 존다 식단', '닭가슴살 100g · 고구마 120g · 아몬드', '#0f766e', '#115e59', '🥗');
-  const sampleImg2 = createSampleFoodSvgDataUrl('점심 클린 도시락', '소고기 우둔살 · 현미밥 · 올리브유 샐러드', '#1d4ed8', '#1e3a8a', '🍱');
-  const sampleImg3 = createSampleFoodSvgDataUrl('저녁 운동 후 식단', '연어 스테이크 · 구운 단호박 · 아보카도', '#4338ca', '#312e81', '🥩');
-  const sampleImg4 = createSampleFoodSvgDataUrl('간식 블록 보충', '무가당 그릭요거트 · 블루베리 · 호두', '#b45309', '#78350f', '🫐');
+  const sampleImg1 = createSampleFoodSvgDataUrl('BREAKFAST', '수비드 닭가슴살 · 구운 고구마 · 아몬드', '4 · 4 · 4 BLOCK', '#E07A5F', '#F2CC8F');
+  const sampleImg2 = createSampleFoodSvgDataUrl('LUNCH', '소고기 우둔살 · 현미밥 · 올리브 오일 그린샐러드', '4 · 4 · 4 BLOCK', '#BC4749', '#E6CCB2');
+  const sampleImg3 = createSampleFoodSvgDataUrl('DINNER', '그릴드 연어 스테이크 · 단호박 · 아보카도', '4 · 4 · 4 BLOCK', '#F4845F', '#84A59D');
+  const sampleImg4 = createSampleFoodSvgDataUrl('SNACK', '무가당 그릭요거트 · 블루베리 · 호두', '2 · 2 · 2 BLOCK', '#6D597A', '#E56B6F');
 
   const dailyLogs = [
     {
@@ -80,9 +92,9 @@ function createInitialData() {
       cafePostedAt: `${today}T20:18:00+09:00`,
       meals: [
         { id: 'm1', type: '아침', time: '08:10', carb: 4, protein: 4, fat: 4, memo: '닭가슴살 120g, 고구마 150g, 아몬드 12알', photoDataUrl: sampleImg1 },
-        { id: 'm2', type: '점심', time: '12:30', carb: 4, protein: 4, fat: 4, memo: '소고기 우둔살 도시락 + 현미밥 + 샐러드', photoDataUrl: sampleImg2 },
-        { id: 'm3', type: '저녁', time: '18:50', carb: 4, protein: 4, fat: 4, memo: '연어 스테이크 + 단호박 + 아보카도', photoDataUrl: sampleImg3 },
-        { id: 'm4', type: '간식', time: '20:00', carb: 2, protein: 2, fat: 2, memo: '프로틴 쉐이크 + 사과 반쪽 + 견과류', photoDataUrl: sampleImg4 }
+        { id: 'm2', type: '점심', time: '12:30', carb: 4, protein: 4, fat: 4, memo: '소고기 우둔살 도시락, 현미밥, 샐러드', photoDataUrl: sampleImg2 },
+        { id: 'm3', type: '저녁', time: '18:50', carb: 4, protein: 4, fat: 4, memo: '연어 스테이크, 단호박, 아보카도 슬라이스', photoDataUrl: sampleImg3 },
+        { id: 'm4', type: '간식', time: '20:00', carb: 2, protein: 2, fat: 2, memo: '프로틴 쉐이크, 사과 반쪽, 견과류', photoDataUrl: sampleImg4 }
       ]
     },
     {
@@ -94,9 +106,9 @@ function createInitialData() {
       cafePosted: false,
       cafePostedAt: null,
       meals: [
-        { id: 'm5', type: '아침', time: '08:40', carb: 3, protein: 3, fat: 3, memo: '계란 3개 + 오트밀 + 땅콩버터', photoDataUrl: sampleImg1 },
-        { id: 'm6', type: '점심', time: '13:00', carb: 4, protein: 4, fat: 4, memo: '닭가슴살 포케 (소스 제외)', photoDataUrl: sampleImg2 },
-        { id: 'm7', type: '저녁', time: '19:20', carb: 4, protein: 4, fat: 4, memo: '돼지 앞다리살 수육 + 쌈채소 + 현미밥', photoDataUrl: sampleImg3 }
+        { id: 'm5', type: '아침', time: '08:40', carb: 3, protein: 3, fat: 3, memo: '계란 3개, 오트밀, 무가당 땅콩버터', photoDataUrl: sampleImg1 },
+        { id: 'm6', type: '점심', time: '13:00', carb: 4, protein: 4, fat: 4, memo: '닭가슴살 포케 (드레싱 제외)', photoDataUrl: sampleImg2 },
+        { id: 'm7', type: '저녁', time: '19:20', carb: 4, protein: 4, fat: 4, memo: '돼지 앞다리살 수육, 쌈채소, 현미밥', photoDataUrl: sampleImg3 }
       ]
     },
     {
@@ -108,9 +120,9 @@ function createInitialData() {
       cafePosted: false,
       cafePostedAt: null,
       meals: [
-        { id: 'm8', type: '아침', time: '09:00', carb: 4, protein: 4, fat: 4, memo: '닭가슴살 샐러드 + 호밀빵', photoDataUrl: sampleImg1 },
-        { id: 'm9', type: '점심', time: '12:40', carb: 6, protein: 5, fat: 6, memo: '점심 회식 삼겹살 + 냉면 조금', photoDataUrl: sampleImg2 },
-        { id: 'm10', type: '저녁', time: '19:30', carb: 5, protein: 4, fat: 5, memo: '저녁 일반식 (목표 14블록 초과!)', photoDataUrl: sampleImg3 }
+        { id: 'm8', type: '아침', time: '09:00', carb: 4, protein: 4, fat: 4, memo: '닭가슴살 샐러드, 통밀빵 1조각', photoDataUrl: sampleImg1 },
+        { id: 'm9', type: '점심', time: '12:40', carb: 6, protein: 5, fat: 6, memo: '점심 팀 회식 삼겹살 및 식사', photoDataUrl: sampleImg2 },
+        { id: 'm10', type: '저녁', time: '19:30', carb: 5, protein: 4, fat: 5, memo: '저녁 일반식 (일일 목표 14블록 초과)', photoDataUrl: sampleImg3 }
       ]
     },
     {
@@ -122,9 +134,9 @@ function createInitialData() {
       cafePosted: true,
       cafePostedAt: `${today}T19:55:00+09:00`,
       meals: [
-        { id: 'm11', type: '아침', time: '07:50', carb: 5, protein: 5, fat: 5, memo: '아침 든든하게 5블록 정석 식단', photoDataUrl: sampleImg1 },
-        { id: 'm12', type: '점심', time: '12:20', carb: 5, protein: 5, fat: 5, memo: '점심 우둔살 볶음밥 5블록', photoDataUrl: sampleImg2 },
-        { id: 'm13', type: '저녁', time: '18:40', carb: 5, protein: 5, fat: 5, memo: '저녁 닭안심 구이 5블록 클리어', photoDataUrl: sampleImg3 }
+        { id: 'm11', type: '아침', time: '07:50', carb: 5, protein: 5, fat: 5, memo: '아침 5블록 정석 식단', photoDataUrl: sampleImg1 },
+        { id: 'm12', type: '점심', time: '12:20', carb: 5, protein: 5, fat: 5, memo: '우둔살 현미 볶음밥 5블록', photoDataUrl: sampleImg2 },
+        { id: 'm13', type: '저녁', time: '18:40', carb: 5, protein: 5, fat: 5, memo: '닭안심 구이와 구운 야채 5블록', photoDataUrl: sampleImg3 }
       ]
     },
     {
@@ -136,9 +148,9 @@ function createInitialData() {
       cafePosted: true,
       cafePostedAt: `${today}T20:32:00+09:00`,
       meals: [
-        { id: 'm14', type: '아침', time: '08:30', carb: 3.5, protein: 3.5, fat: 3.5, memo: '그릭요거트 + 닭가슴살 소시지', photoDataUrl: sampleImg1 },
-        { id: 'm15', type: '점심', time: '12:50', carb: 4, protein: 4, fat: 4, memo: '현미밥 100g + 연어포케', photoDataUrl: sampleImg2 },
-        { id: 'm16', type: '저녁', time: '19:10', carb: 3.5, protein: 3.5, fat: 3.5, memo: '고구마 + 계란흰자 + 아몬드', photoDataUrl: sampleImg3 }
+        { id: 'm14', type: '아침', time: '08:30', carb: 3.5, protein: 3.5, fat: 3.5, memo: '그릭요거트, 닭가슴살 소시지', photoDataUrl: sampleImg1 },
+        { id: 'm15', type: '점심', time: '12:50', carb: 4, protein: 4, fat: 4, memo: '현미밥 100g, 연어 포케 볼', photoDataUrl: sampleImg2 },
+        { id: 'm16', type: '저녁', time: '19:10', carb: 3.5, protein: 3.5, fat: 3.5, memo: '찐고구마, 달걀 흰자, 아몬드', photoDataUrl: sampleImg3 }
       ]
     }
   ];
@@ -147,41 +159,41 @@ function createInitialData() {
     {
       id: 'ms1',
       userId: 'u1',
-      weekLabel: '2주차 주간 미션',
+      weekLabel: 'WEEK 2',
       date: today,
-      memo: '로잉 2,000m 7분 24초 완료! 댐퍼 5 세팅',
+      memo: '로잉 2,000m 7분 24초 완주 (댐퍼 5)',
       createdAt: `${today}T18:10:00+09:00`
     },
     {
       id: 'ms2',
       userId: 'u2',
-      weekLabel: '2주차 주간 미션',
+      weekLabel: 'WEEK 2',
       date: today,
-      memo: '버피 100개 6분 52초 숨차 죽는줄 알았습니다🔥',
+      memo: '버피 100개 6분 52초 완료',
       createdAt: `${today}T19:00:00+09:00`
     },
     {
       id: 'ms3',
       userId: 'u5',
-      weekLabel: '2주차 주간 미션',
+      weekLabel: 'WEEK 2',
       date: yesterday,
-      memo: '수업 끝나고 로잉 2,000m 7분 08초 인증 완료',
+      memo: '수업 직후 로잉 2,000m 7분 08초 기록 인증',
       createdAt: `${yesterday}T21:15:00+09:00`
     },
     {
       id: 'ms4',
       userId: 'u9',
-      weekLabel: '2주차 주간 미션',
+      weekLabel: 'WEEK 2',
       date: yesterday,
-      memo: '오픈짐 버피 100개 완주 인증!',
+      memo: '오픈짐 버피 100개 완주',
       createdAt: `${yesterday}T20:40:00+09:00`
     },
     {
       id: 'ms5',
       userId: 'u13',
-      weekLabel: '2주차 주간 미션',
+      weekLabel: 'WEEK 2',
       date: today,
-      memo: '로잉 2000m 7분 35초 인증합니다',
+      memo: '로잉 2,000m 7분 35초 완료',
       createdAt: `${today}T17:30:00+09:00`
     }
   ];
@@ -192,7 +204,7 @@ function createInitialData() {
       userId: 'u3',
       date: twoDaysAgo,
       type: 'OVER_BLOCK',
-      reason: '하루 목표 블록 초과 섭취 (탄수화물 16.5 / 목표 14블록)',
+      reason: '일일 목표 블록 초과 (탄수화물 16.5 / 목표 14블록)',
       amount: 10000,
       createdAt: `${twoDaysAgo}T23:59:00+09:00`
     },
@@ -201,7 +213,7 @@ function createInitialData() {
       userId: 'u4',
       date: yesterday,
       type: 'NO_CAFE',
-      reason: '밤 12시 전 네이버 카페 식단 게시글 미작성 (12:18 지각 업로드)',
+      reason: '자정 전 네이버 카페 식단 게시글 미작성 (00:18 지각 업로드)',
       amount: 10000,
       createdAt: `${yesterday}T23:59:00+09:00`
     },
@@ -210,7 +222,7 @@ function createInitialData() {
       userId: 'u8',
       date: twoDaysAgo,
       type: 'NO_KAKAO',
-      reason: '밤 12시 전 2조 단톡방 식단 미보고',
+      reason: '자정 전 2조 단톡방 식단 미보고',
       amount: 10000,
       createdAt: `${twoDaysAgo}T23:59:00+09:00`
     },
@@ -219,7 +231,7 @@ function createInitialData() {
       userId: 'u8',
       date: yesterday,
       type: 'NO_MISSION',
-      reason: '1주차 주간 미션 운동 미수행',
+      reason: 'WEEK 1 주간 미션 운동 미수행',
       amount: 10000,
       createdAt: `${yesterday}T23:59:00+09:00`
     },
@@ -228,7 +240,7 @@ function createInitialData() {
       userId: 'u12',
       date: yesterday,
       type: 'OVER_BLOCK',
-      reason: '하루 목표 블록 초과 섭취 (지방 14 / 목표 11블록)',
+      reason: '일일 목표 블록 초과 (지방 14 / 목표 11블록)',
       amount: 10000,
       createdAt: `${yesterday}T23:59:00+09:00`
     },
@@ -237,7 +249,7 @@ function createInitialData() {
       userId: 'u16',
       date: yesterday,
       type: 'NO_CAFE',
-      reason: '밤 12시 전 네이버 카페 식단 인증 미작성',
+      reason: '자정 전 네이버 카페 식단 인증 누락',
       amount: 10000,
       createdAt: `${yesterday}T23:59:00+09:00`
     }
@@ -245,7 +257,7 @@ function createInitialData() {
 
   return {
     settings: {
-      challengeName: '크로스핏 레벤 존다 챌린지',
+      challengeName: 'LEBEN ZONE CHALLENGE',
       boxName: 'CrossFit LEBEN',
       startDate: getKstDateString(-8),
       endDate: getKstDateString(19),
@@ -254,9 +266,9 @@ function createInitialData() {
       adminPin: '0000',
       cafeUrl: 'https://cafe.naver.com/',
       weeklyMission: {
-        weekLabel: '2주차 주간 미션',
-        title: '로잉 2,000m 타기 또는 버피 100개 완주',
-        description: '일요일 밤 12시 전까지 로잉 2,000m 기록 화면 또는 버피 100개 완료 인증을 등록해주세요. 주간 미션 미이행 시 패널티 1회(1만원)가 부여됩니다.',
+        weekLabel: 'WEEK 2',
+        title: '로잉 2,000m 또는 버피 100개 완주',
+        description: '일요일 24:00 전까지 박스 내 로잉 2,000m 모니터 기록 또는 버피 100개 완주 기록을 남겨주세요. 미이행 시 10,000원 패널티가 부과됩니다.',
         deadlineDay: '일요일 24:00 마감'
       }
     },
@@ -354,7 +366,6 @@ const server = http.createServer(async (req, res) => {
   const pathname = parsedUrl.pathname;
 
   try {
-    // API Endpoints
     if (pathname === '/api/state' && req.method === 'GET') {
       const db = ensureDb();
       return sendJson(res, 200, {
@@ -367,7 +378,6 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
-    // Add or update a meal entry for a user on a date
     if (pathname === '/api/meals' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const { userId, date, meal } = body;
@@ -405,7 +415,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, log });
     }
 
-    // Delete a meal entry
     if (pathname === '/api/meals/delete' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const { userId, date, mealId } = body;
@@ -418,7 +427,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, log });
     }
 
-    // Update daily certification check (KakaoTalk / Naver Cafe report status)
     if (pathname === '/api/daily-status' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const { userId, date, kakaoReported, cafePosted } = body;
@@ -450,7 +458,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, log });
     }
 
-    // Add or delete weekly mission certification
     if (pathname === '/api/missions' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const { action, userId, weekLabel, date, memo, photoDataUrl, missionId } = body;
@@ -465,7 +472,7 @@ const server = http.createServer(async (req, res) => {
         userId,
         weekLabel: weekLabel || db.settings.weeklyMission.weekLabel,
         date: date || getKstDateString(0),
-        memo: memo || '주간 미션 운동 완료!',
+        memo: memo || '주간 미션 운동 완료',
         photoDataUrl: photoDataUrl || null,
         createdAt: new Date().toISOString()
       };
@@ -474,7 +481,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, entry: newEntry, missionLogs: db.missionLogs });
     }
 
-    // Manage penalties (add, bulk-add, delete)
     if (pathname === '/api/penalties' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const { action, penalty, penalties, penaltyId } = body;
@@ -520,7 +526,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 400, { error: '잘못된 요청입니다.' });
     }
 
-    // Update participants or settings (Admin)
     if (pathname === '/api/admin/update' && req.method === 'POST') {
       const body = await readJsonBody(req);
       const db = ensureDb();
@@ -551,7 +556,6 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, db });
     }
 
-    // Serve static files from /public
     let safePath = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
     if (safePath === '/' || safePath === '\\') {
       safePath = '/index.html';
@@ -565,7 +569,6 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Fallback to index.html for SPA
     const indexPath = path.join(PUBLIC_DIR, 'index.html');
     if (fs.existsSync(indexPath)) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -581,13 +584,15 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+ensureDb();
+
 server.listen(PORT, '0.0.0.0', () => {
   const ips = getLanAddresses();
   console.log(`\n==================================================`);
-  console.log(`🏋️ 크로스핏 레벤 존다 챌린지 웹앱 서버 실행 완료!`);
+  console.log(`LEBEN ZONE CHALLENGE 서버 실행 완료`);
   console.log(`- PC 접속 주소: http://localhost:${PORT}`);
   if (ips.length > 0) {
-    console.log(`- 같은 와이파이(모바일) 접속 주소: http://${ips[0]}:${PORT}`);
+    console.log(`- 모바일 접속 주소: http://${ips[0]}:${PORT}`);
   }
   console.log(`==================================================\n`);
 });

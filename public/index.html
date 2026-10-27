@@ -3,78 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b1120" />
+  <meta name="theme-color" content="#F3F4F6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>크로스핏 레벤 존다 챌린지</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>LEBEN ZONE · 크로스핏 레벤 존다 챌린지</title>
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <!-- 상단 고정 헤더 -->
+    <!-- 상단 앱바 -->
     <header class="top-header">
       <div class="header-row-1">
         <div class="brand-wrap">
-          <span class="brand-badge">LEBEN</span>
-          <span class="brand-title" id="headerChallengeTitle">레벤 존다 챌린지</span>
+          <span class="brand-mark">LEBEN</span>
+          <span class="brand-title" id="headerChallengeTitle">ZONE CHALLENGE</span>
         </div>
         <button class="user-pill-btn" id="btnSwitchUser" type="button">
-          <span id="currentUserBadge">👤 참가자 선택</span>
-          <span>▾</span>
+          <span class="user-team-dot" id="currentUserTeamTag">1조</span>
+          <span id="currentUserBadge">김레벤</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
       </div>
+
       <div class="header-row-2">
         <div class="date-nav">
-          <button type="button" id="btnPrevDate" title="이전 날짜">◀</button>
+          <button type="button" id="btnPrevDate" aria-label="이전 날짜">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
           <input type="date" id="datePicker" />
-          <button type="button" id="btnNextDate" title="다음 날짜">▶</button>
-          <button type="button" id="btnTodayDate" style="color:#fdba74;font-size:12px;">오늘</button>
+          <button type="button" id="btnNextDate" aria-label="다음 날짜">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <button type="button" class="date-today-btn" id="btnTodayDate">오늘</button>
         </div>
+
         <div class="deadline-timer" id="midnightCountdown">
-          ⏰ 밤 12시 마감까지 계산중...
+          <span class="pulse-dot"></span>
+          <span id="midnightCountdownText">마감 00:00:00</span>
         </div>
       </div>
     </header>
 
-    <!-- 메인 뷰 컨테이너 -->
+    <!-- 메인 컨텐츠 영역 -->
     <main class="main-content" id="mainView"></main>
 
-    <!-- 하단 탭 네비게이션 -->
+    <!-- 하단 탭바 (SVG 아이콘) -->
     <nav class="bottom-nav">
       <div class="bottom-nav-inner">
         <button type="button" class="nav-tab active" data-tab="diet">
-          <span class="nav-icon">🍽️</span>
-          <span>식단·블록</span>
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/>
+          </svg>
+          <span>식단 기록</span>
         </button>
         <button type="button" class="nav-tab" data-tab="share">
-          <span class="nav-icon">📤</span>
-          <span>카페·단톡공유</span>
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+          <span>인증 카드</span>
         </button>
         <button type="button" class="nav-tab" data-tab="teams">
-          <span class="nav-icon">👥</span>
-          <span>조별현황(5조)</span>
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>조별 현황</span>
         </button>
         <button type="button" class="nav-tab" data-tab="penalty">
-          <span class="nav-icon">🏋️</span>
-          <span>미션·패널티</span>
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+          </svg>
+          <span>미션·벌금</span>
         </button>
         <button type="button" class="nav-tab" data-tab="admin">
-          <span class="nav-icon">⚙️</span>
-          <span>코치관리</span>
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>코치 관리</span>
         </button>
       </div>
     </nav>
   </div>
 
-  <!-- 참가자 선택 & 4자리 PIN 모달 -->
+  <!-- 모달 -->
   <div class="modal-backdrop" id="userModal" style="display:none;">
     <div class="modal-card" id="userModalContent"></div>
   </div>
 
-  <!-- 토스트 알림 -->
+  <!-- 토스트 -->
   <div class="toast-container" id="toastContainer"></div>
 
   <script src="/card-generator.js"></script>

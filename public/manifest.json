@@ -1,11 +1,11 @@
 {
-  "name": "크로스핏 레벤 존다 챌린지",
-  "short_name": "레벤 존다",
-  "description": "크로스핏 레벤 존 다이어트(Zone Diet) 챌린지 식단 블록 기록 · 조별 현황 · 카페/단톡 공유 · 패널티 관리 앱",
+  "name": "LEBEN ZONE CHALLENGE",
+  "short_name": "LEBEN ZONE",
+  "description": "크로스핏 레벤 존 다이어트(Zone Diet) 챌린지 식단 블록 기록 · 조별 현황 · 카페/단톡 인증 카드 · 패널티 관리",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#F4F5F7",
+  "theme_color": "#F4F5F7",
   "orientation": "portrait",
   "icons": [
     {

@@ -1,4 +1,4 @@
-// 하루 식단 요약 카드 (Canvas 이미지 생성기) 및 단톡방/네이버카페 공유 텍스트 생성기
+// 일일 식단 인증 카드 (Canvas 에디토리얼 디자인) 및 단톡방·네이버 카페 공유 텍스트 생성기
 
 function roundRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
@@ -56,42 +56,38 @@ window.ZoneShareHelper = {
     const cPct = Math.round((carb / totalSum) * 100);
     const pPct = Math.round((protein / totalSum) * 100);
     const fPct = Math.max(0, 100 - cPct - pPct);
-    return `${cR} : ${pR} : ${fR} (블록비율 ${cPct}:${pPct}:${fPct}%)`;
+    return `${cR} : ${pR} : ${fR} (${cPct}:${pPct}:${fPct}%)`;
   },
 
-  buildKakaoText({ user, date, meals, missionDone, challengeName }) {
+  buildKakaoText({ user, date, meals, missionDone }) {
     const totals = this.computeTotals(meals);
     const target = Number(user.targetBlocks || 11);
     const isOver = totals.carb > target || totals.protein > target || totals.fat > target;
     const ratioStr = this.computeRatioText(totals);
+    const shortDate = date.slice(5).replace('-', '.');
 
     const mealLines =
       meals.length > 0
         ? meals
             .map(
               m =>
-                `• [${m.type}] 탄 ${formatBlockNum(m.carb)} / 단 ${formatBlockNum(m.protein)} / 지 ${formatBlockNum(m.fat)}${
-                  m.memo ? ` (${m.memo})` : ''
+                `- [${m.type}] 탄 ${formatBlockNum(m.carb)} / 단 ${formatBlockNum(m.protein)} / 지 ${formatBlockNum(m.fat)}${
+                  m.memo ? ` · ${m.memo}` : ''
                 }`
             )
             .join('\n')
-        : '• 등록된 끼니 없음';
+        : '- 등록된 끼니 없음';
 
     return [
-      `🔥 [${challengeName || '레벤 존다 챌린지'}] ${user.team}조 ${user.name} 식단 보고`,
-      `📅 일자: ${date}`,
-      `━━━━━━━━━━━━━━━━━━`,
-      `📊 총 섭취 블록 (목표: 각 ${target}블록)`,
-      `• 탄수화물: ${formatBlockNum(totals.carb)} / ${target}블록`,
-      `• 단백질: ${formatBlockNum(totals.protein)} / ${target}블록`,
-      `• 지방: ${formatBlockNum(totals.fat)} / ${target}블록`,
-      `⚖️ 탄:단:지 비율: ${ratioStr}`,
-      `🚦 상태: ${isOver ? '⚠️ 목표 블록 초과' : '✅ 목표 블록 이내 완료'}`,
-      `━━━━━━━━━━━━━━━━━━`,
-      `🍽️ 끼니별 상세 기록 (${meals.length}끼)`,
+      `[레벤 존다 · ${user.team}조 ${user.name}] ${shortDate} 식단 보고`,
+      `──────────────────`,
+      `총 섭취 : 탄 ${formatBlockNum(totals.carb)} · 단 ${formatBlockNum(totals.protein)} · 지 ${formatBlockNum(totals.fat)} (목표 ${target}블록)`,
+      `탄단지 비율 : ${ratioStr}`,
+      `일일 판정 : ${isOver ? '목표 블록 초과' : '목표 블록 내 완료'}`,
+      `──────────────────`,
       mealLines,
-      `━━━━━━━━━━━━━━━━━━`,
-      `🏋️ 이번 주 미션운동: ${missionDone ? '완료 ✅' : '진행중 ⏳'}`
+      `──────────────────`,
+      `주간 미션 : ${missionDone ? '완료' : '진행중'}`
     ].join('\n');
   },
 
@@ -115,9 +111,9 @@ window.ZoneShareHelper = {
         ? meals
             .map(
               (m, idx) =>
-                `${idx + 1}. [${m.type} | ${m.time || '-'}]\n   - 블록: 탄수화물 ${formatBlockNum(
+                `${idx + 1}. ${m.type} (${m.time || '-'})\n   블록 : 탄수화물 ${formatBlockNum(
                   m.carb
-                )}블록 / 단백질 ${formatBlockNum(m.protein)}블록 / 지방 ${formatBlockNum(m.fat)}블록\n   - 메뉴: ${
+                )} / 단백질 ${formatBlockNum(m.protein)} / 지방 ${formatBlockNum(m.fat)} 블록\n   식단 : ${
                   m.memo || '사진 첨부'
                 }`
             )
@@ -125,31 +121,29 @@ window.ZoneShareHelper = {
         : '기록된 식단이 없습니다.';
 
     return [
-      `■ 참가자 정보: ${user.team}조 ${user.name} (${user.role || '조원'})`,
-      `■ 인증 일자: ${date} (밤 12시 전 작성)`,
-      `■ 일일 목표 블록: 탄 ${target} / 단 ${target} / 지 ${target} 블록`,
+      `참가자 : ${user.team}조 ${user.name}`,
+      `인증일 : ${date}`,
+      `일일 목표 : 탄 ${target} · 단 ${target} · 지 ${target} 블록`,
       ``,
-      `━━━━━━━━━━━━━━━━━━━━━━`,
-      `[1] 오늘 총 섭취 블록 및 탄단지 비율`,
-      `• 탄수화물(C): 총 ${formatBlockNum(totals.carb)}블록 (목표 ${target}블록)`,
-      `• 단백질(P): 총 ${formatBlockNum(totals.protein)}블록 (목표 ${target}블록)`,
-      `• 지방(F): 총 ${formatBlockNum(totals.fat)}블록 (목표 ${target}블록)`,
-      `• 탄:단:지 블록 비율: ${ratioStr}`,
-      `• 블록 준수 여부: ${isOver ? '목표 블록 초과 ⚠️' : '정량 준수 완료 ✅'}`,
+      `──────────────────────`,
+      `1. 일일 섭취 블록 합계 및 비율`,
+      `- 탄수화물(C) : ${formatBlockNum(totals.carb)} / ${target} 블록`,
+      `- 단백질(P) : ${formatBlockNum(totals.protein)} / ${target} 블록`,
+      `- 지방(F) : ${formatBlockNum(totals.fat)} / ${target} 블록`,
+      `- 탄:단:지 비율 : ${ratioStr}`,
+      `- 준수 여부 : ${isOver ? '목표 블록 초과' : '목표 범위 내 완료'}`,
       ``,
-      `━━━━━━━━━━━━━━━━━━━━━━`,
-      `[2] 끼니별 식단 및 블록 내역`,
+      `──────────────────────`,
+      `2. 끼니별 상세 내역`,
       mealDetails,
       ``,
-      `━━━━━━━━━━━━━━━━━━━━━━`,
-      `[3] 주간 미션 운동 (${weeklyMissionTitle || '주간 미션'})`,
-      `• 수행 여부: ${missionDone ? '이번 주 미션 완료 ✅' : '이번 주 내 완료 예정 ⏳'}`,
-      ``,
-      `※ 첨부된 '오늘의 존다 요약 카드' 이미지로 전체 식단 사진을 한눈에 확인하실 수 있습니다.`
+      `──────────────────────`,
+      `3. 주간 미션 (${weeklyMissionTitle || '주간 운동 미션'})`,
+      `- 상태 : ${missionDone ? '이번 주 미션 완료' : '진행 중'}`
     ].join('\n');
   },
 
-  async renderSummaryCardCanvas(canvas, { user, date, meals, missionDone, settings }) {
+  async renderSummaryCardCanvas(canvas, { user, date, meals, missionDone }) {
     const totals = this.computeTotals(meals);
     const target = Number(user.targetBlocks || 11);
     const isOver = totals.carb > target || totals.protein > target || totals.fat > target;
@@ -157,130 +151,134 @@ window.ZoneShareHelper = {
 
     const mealCount = meals.length;
     const rows = Math.max(1, Math.ceil(Math.max(mealCount, 1) / 2));
-    const cardWidth = 900;
-    const photoRowHeight = 290;
-    const cardHeight = 560 + rows * photoRowHeight + 110;
+    const cardWidth = 960;
+    const photoRowHeight = 320;
+    const cardHeight = 520 + rows * photoRowHeight + 100;
 
     canvas.width = cardWidth;
     canvas.height = cardHeight;
     const ctx = canvas.getContext('2d');
 
-    // Background gradient
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, cardHeight);
-    bgGrad.addColorStop(0, '#0f172a');
-    bgGrad.addColorStop(1, '#1e293b');
-    ctx.fillStyle = bgGrad;
+    // Deep Carbon Editorial Background
+    ctx.fillStyle = '#111315';
     ctx.fillRect(0, 0, cardWidth, cardHeight);
 
-    // Top accent bar
-    const topGrad = ctx.createLinearGradient(0, 0, cardWidth, 0);
-    topGrad.addColorStop(0, '#f97316');
-    topGrad.addColorStop(1, '#ef4444');
-    ctx.fillStyle = topGrad;
-    ctx.fillRect(0, 0, cardWidth, 14);
+    // Top Volt Accent Line
+    ctx.fillStyle = isOver ? '#FF4E36' : '#C8F904';
+    ctx.fillRect(0, 0, cardWidth, 8);
 
-    // Header Title & Badge
-    ctx.fillStyle = '#f97316';
-    ctx.font = 'bold 22px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText('CROSSFIT LEBEN · ZONE DIET CHALLENGE', 48, 66);
+    // Top Meta Header
+    ctx.fillStyle = '#8B929E';
+    ctx.font = '700 17px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText('CROSSFIT LEBEN  ·  ZONE DIET CHALLENGE', 56, 66);
 
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 42px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText(`${user.team}조 ${user.name} · 일일 식단 인증`, 48, 118);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '800 44px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText(`${user.team}조 ${user.name}`, 56, 122);
 
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '600 22px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText(`📅 인증일자: ${date}   |   🎯 일일 목표: 각 ${target}블록`, 48, 158);
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '600 22px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText(`${date.replace(/-/g, '.')}   ·   DAILY TARGET ${target} BLOCKS`, 56, 160);
 
-    // Status Stamp on Top Right
+    // Right Status Pill
     ctx.save();
-    roundRect(ctx, 640, 56, 212, 86, 18);
-    ctx.fillStyle = isOver ? 'rgba(239, 68, 68, 0.18)' : 'rgba(16, 185, 129, 0.18)';
-    ctx.fill();
-    ctx.lineWidth = 2.5;
-    ctx.strokeStyle = isOver ? '#ef4444' : '#10b981';
-    ctx.stroke();
-    ctx.fillStyle = isOver ? '#fca5a5' : '#6ee7b7';
-    ctx.font = 'bold 22px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(isOver ? '⚠️ 블록 초과' : '✅ 정량 준수', 746, 95);
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '600 17px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText(missionDone ? '주간미션 완료 🏋️' : '12시 전 식단기록', 746, 124);
-    ctx.restore();
-
-    // Macro Summary Box
-    roundRect(ctx, 48, 190, cardWidth - 96, 260, 24);
-    ctx.fillStyle = 'rgba(30, 41, 59, 0.95)';
+    roundRect(ctx, 684, 64, 220, 76, 16);
+    ctx.fillStyle = isOver ? 'rgba(255, 78, 54, 0.14)' : 'rgba(200, 249, 4, 0.12)';
     ctx.fill();
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
+    ctx.strokeStyle = isOver ? '#FF4E36' : '#C8F904';
     ctx.stroke();
 
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 24px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText('📊 오늘 섭취 탄·단·지 블록 합계', 80, 236);
+    ctx.fillStyle = isOver ? '#FF6B57' : '#C8F904';
+    ctx.font = '800 20px "Pretendard", -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(isOver ? 'OVER TARGET' : 'TARGET CLEARED', 794, 98);
+    ctx.fillStyle = '#D1D5DB';
+    ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText(missionDone ? 'WEEKLY MISSION DONE' : 'DAILY DIET LOGGED', 794, 123);
+    ctx.restore();
 
-    ctx.fillStyle = '#fb923c';
-    ctx.font = 'bold 20px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(`탄:단:지 비율  ${ratioStr}`, cardWidth - 80, 236);
-    ctx.textAlign = 'left';
-
-    const macros = [
-      { label: '탄수화물 (C)', val: totals.carb, color: '#38bdf8', sub: '1블록 = 9g' },
-      { label: '단백질 (P)', val: totals.protein, color: '#f97316', sub: '1블록 = 7g' },
-      { label: '지방 (F)', val: totals.fat, color: '#facc15', sub: '1블록 = 1.5g' }
+    // 3-Column Macro Bento Box
+    const bentoY = 198;
+    const bentoW = (cardWidth - 112 - 32) / 3;
+    const bentoH = 196;
+    const macroCards = [
+      { code: 'CARB · 탄수화물', val: totals.carb, color: '#38BDF8', sub: '9g per block' },
+      { code: 'PROTEIN · 단백질', val: totals.protein, color: '#C8F904', sub: '7g per block' },
+      { code: 'FAT · 지방', val: totals.fat, color: '#FBBF24', sub: '1.5g per block' }
     ];
 
-    macros.forEach((m, idx) => {
-      const y = 278 + idx * 54;
-      ctx.fillStyle = '#cbd5e1';
-      ctx.font = 'bold 21px "Pretendard", "Malgun Gothic", sans-serif';
-      ctx.fillText(m.label, 80, y);
+    macroCards.forEach((mc, i) => {
+      const bx = 56 + i * (bentoW + 16);
+      roundRect(ctx, bx, bentoY, bentoW, bentoH, 20);
+      ctx.fillStyle = '#1A1D21';
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.stroke();
 
-      // Bar track
-      const barX = 245;
-      const barW = 420;
-      const barH = 22;
-      roundRect(ctx, barX, y - 18, barW, barH, 11);
-      ctx.fillStyle = '#0f172a';
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '700 16px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(mc.code, bx + 24, bentoY + 40);
+
+      const overMacro = mc.val > target;
+      ctx.fillStyle = overMacro ? '#FF4E36' : '#FFFFFF';
+      ctx.font = '800 44px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(formatBlockNum(mc.val), bx + 24, bentoY + 102);
+
+      const numWidth = ctx.measureText(formatBlockNum(mc.val)).width;
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '600 22px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(`/ ${target}B`, bx + 32 + numWidth, bentoY + 100);
+
+      // Progress track
+      const trackX = bx + 24;
+      const trackY = bentoY + 132;
+      const trackW = bentoW - 48;
+      roundRect(ctx, trackX, trackY, trackW, 10, 5);
+      ctx.fillStyle = '#272B31';
       ctx.fill();
 
-      // Bar fill
-      const ratio = Math.min(1.15, m.val / Math.max(target, 1));
-      const fillW = Math.max(12, Math.min(barW, barW * (m.val / Math.max(target, 1))));
-      roundRect(ctx, barX, y - 18, fillW, barH, 11);
-      ctx.fillStyle = m.val > target ? '#ef4444' : m.color;
+      const fillW = Math.max(8, Math.min(trackW, trackW * (mc.val / Math.max(target, 1))));
+      roundRect(ctx, trackX, trackY, fillW, 10, 5);
+      ctx.fillStyle = overMacro ? '#FF4E36' : mc.color;
       ctx.fill();
 
-      // Value text
-      ctx.fillStyle = m.val > target ? '#fca5a5' : '#ffffff';
-      ctx.font = 'bold 22px "Pretendard", "Malgun Gothic", sans-serif';
-      ctx.fillText(
-        `${formatBlockNum(m.val)} / ${target}블록${m.val > target ? ' (초과!)' : ''}`,
-        barX + barW + 22,
-        y
-      );
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '500 14px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(mc.sub, bx + 24, bentoY + 170);
     });
 
-    // Meal Photos Section Title
-    ctx.fillStyle = '#f8fafc';
-    ctx.font = 'bold 26px "Pretendard", "Malgun Gothic", sans-serif';
-    ctx.fillText(`🍽️ 오늘의 식단 사진 및 끼니별 블록 (${mealCount}끼)`, 48, 505);
+    // Ratio Strip
+    roundRect(ctx, 56, 412, cardWidth - 112, 54, 14);
+    ctx.fillStyle = '#1A1D21';
+    ctx.fill();
+    ctx.fillStyle = '#9CA3AF';
+    ctx.font = '600 17px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText('BALANCE RATIO (C : P : F)', 80, 445);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = '700 18px "Pretendard", -apple-system, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(ratioStr, cardWidth - 80, 445);
+    ctx.textAlign = 'left';
 
-    const gridStartY = 530;
-    const colW = (cardWidth - 96 - 24) / 2; // 390px each
-    const cellH = 266;
+    // Meals Section Header
+    ctx.fillStyle = '#8B929E';
+    ctx.font = '700 16px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText(`MEAL LOGS (${mealCount})`, 56, 504);
+
+    const gridStartY = 524;
+    const colW = (cardWidth - 112 - 24) / 2;
+    const cellH = 296;
 
     if (mealCount === 0) {
-      roundRect(ctx, 48, gridStartY, cardWidth - 96, 220, 20);
-      ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+      roundRect(ctx, 56, gridStartY, cardWidth - 112, 220, 20);
+      ctx.fillStyle = '#1A1D21';
       ctx.fill();
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '600 24px "Pretendard", "Malgun Gothic", sans-serif';
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '600 22px "Pretendard", -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('아직 등록된 끼니 식단이 없습니다.', cardWidth / 2, gridStartY + 115);
+      ctx.fillText('등록된 식단 사진이 없습니다.', cardWidth / 2, gridStartY + 115);
       ctx.textAlign = 'left';
     } else {
       const images = await Promise.all(meals.map(m => loadImage(m.photoDataUrl)));
@@ -288,74 +286,61 @@ window.ZoneShareHelper = {
       meals.forEach((meal, idx) => {
         const col = idx % 2;
         const row = Math.floor(idx / 2);
-        const x = 48 + col * (colW + 24);
+        const x = 56 + col * (colW + 24);
         const y = gridStartY + row * photoRowHeight;
 
         roundRect(ctx, x, y, colW, cellH, 20);
-        ctx.fillStyle = '#0f172a';
+        ctx.fillStyle = '#1A1D21';
         ctx.fill();
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
-        ctx.stroke();
 
-        // Draw photo inside clipped area
         ctx.save();
-        roundRect(ctx, x, y, colW, 186, 20);
+        roundRect(ctx, x, y, colW, 206, 20);
         ctx.clip();
         const img = images[idx];
         if (img) {
-          const scale = Math.max(colW / img.width, 186 / img.height);
+          const scale = Math.max(colW / img.width, 206 / img.height);
           const sw = img.width * scale;
           const sh = img.height * scale;
           const sx = x + (colW - sw) / 2;
-          const sy = y + (186 - sh) / 2;
+          const sy = y + (206 - sh) / 2;
           ctx.drawImage(img, sx, sy, sw, sh);
         } else {
-          ctx.fillStyle = '#1e293b';
-          ctx.fillRect(x, y, colW, 186);
-          ctx.fillStyle = '#64748b';
-          ctx.font = 'bold 22px "Pretendard", "Malgun Gothic", sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('🥗 식단 사진 없음', x + colW / 2, y + 100);
-          ctx.textAlign = 'left';
+          ctx.fillStyle = '#23272E';
+          ctx.fillRect(x, y, colW, 206);
         }
 
-        // Top-left meal type badge
-        roundRect(ctx, x + 14, y + 14, 112, 36, 10);
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        // Top Pill
+        roundRect(ctx, x + 16, y + 16, 108, 32, 16);
+        ctx.fillStyle = 'rgba(17, 19, 21, 0.82)';
         ctx.fill();
-        ctx.fillStyle = '#f97316';
-        ctx.font = 'bold 18px "Pretendard", "Malgun Gothic", sans-serif';
-        ctx.fillText(`${meal.type} ${meal.time || ''}`, x + 26, y + 38);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '700 15px "Pretendard", -apple-system, sans-serif';
+        ctx.fillText(`${meal.type} ${meal.time || ''}`, x + 30, y + 37);
         ctx.restore();
 
-        // Bottom caption area of card
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 20px "Pretendard", "Malgun Gothic", sans-serif';
+        // Bottom caption
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '700 20px "Pretendard", -apple-system, sans-serif';
         ctx.fillText(
-          `탄 ${formatBlockNum(meal.carb)}  ·  단 ${formatBlockNum(meal.protein)}  ·  지 ${formatBlockNum(meal.fat)} 블록`,
-          x + 18,
-          y + 218
+          `C ${formatBlockNum(meal.carb)}  ·  P ${formatBlockNum(meal.protein)}  ·  F ${formatBlockNum(meal.fat)} BLOCK`,
+          x + 22,
+          y + 242
         );
 
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '500 17px "Pretendard", "Malgun Gothic", sans-serif';
+        ctx.fillStyle = '#8B929E';
+        ctx.font = '500 16px "Pretendard", -apple-system, sans-serif';
         const memoText = meal.memo || '식단 기록 완료';
-        const clippedMemo = memoText.length > 22 ? memoText.slice(0, 22) + '…' : memoText;
-        ctx.fillText(clippedMemo, x + 18, y + 246);
+        const clippedMemo = memoText.length > 24 ? memoText.slice(0, 24) + '…' : memoText;
+        ctx.fillText(clippedMemo, x + 22, y + 272);
       });
     }
 
-    // Footer
-    const footerY = cardHeight - 44;
-    ctx.fillStyle = '#64748b';
-    ctx.font = '600 18px "Pretendard", "Malgun Gothic", sans-serif';
+    // Minimal Footer
+    const footerY = cardHeight - 40;
+    ctx.fillStyle = '#525866';
+    ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(
-      `${settings?.challengeName || '크로스핏 레벤 존다 챌린지'} · 밤 12시 전 일일 식단 & 블록 인증 카드`,
-      cardWidth / 2,
-      footerY
-    );
+    ctx.fillText('VERIFIED DAILY LOG  ·  CROSSFIT LEBEN ZONE CHALLENGE', cardWidth / 2, footerY);
     ctx.textAlign = 'left';
   }
 };

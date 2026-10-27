@@ -1,4 +1,15 @@
-// 크로스핏 레벤 존다 챌린지 프론트엔드 애플리케이션
+// LEBEN ZONE CHALLENGE 프론트엔드 클라이언트
+
+const Icons = {
+  check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  camera: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
+  copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`,
+  download: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
+  share: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>`,
+  arrowRight: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+  external: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>`,
+  lock: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+};
 
 const AppState = {
   db: null,
@@ -7,7 +18,6 @@ const AppState = {
   activeTab: 'diet',
   selectedTeamFilter: 'all',
   adminUnlocked: sessionStorage.getItem('leben_admin_unlocked') === 'true',
-  // 식단 입력 폼 상태
   mealForm: {
     editingId: null,
     type: '아침',
@@ -29,7 +39,7 @@ function showToast(msg) {
   container.appendChild(el);
   setTimeout(() => {
     el.remove();
-  }, 2600);
+  }, 2400);
 }
 
 function formatBlock(n) {
@@ -41,7 +51,7 @@ function formatWon(amount) {
   return Number(amount || 0).toLocaleString('ko-KR') + '원';
 }
 
-async function copyToClipboard(text, successMsg = '클립보드에 복사되었습니다!') {
+async function copyToClipboard(text, successMsg = '클립보드에 복사되었습니다') {
   try {
     await navigator.clipboard.writeText(text);
     showToast(successMsg);
@@ -128,9 +138,11 @@ function renderHeader() {
   if (titleEl && AppState.db?.settings?.challengeName) {
     titleEl.textContent = AppState.db.settings.challengeName;
   }
+  const teamTagEl = document.getElementById('currentUserTeamTag');
   const badgeEl = document.getElementById('currentUserBadge');
-  if (badgeEl && user) {
-    badgeEl.textContent = `👤 ${user.team}조 ${user.name} (${user.targetBlocks}블록)`;
+  if (user) {
+    if (teamTagEl) teamTagEl.textContent = `${user.team}조`;
+    if (badgeEl) badgeEl.textContent = `${user.name} · ${user.targetBlocks}B`;
   }
   const picker = document.getElementById('datePicker');
   if (picker && picker.value !== AppState.selectedDate) {
@@ -139,7 +151,7 @@ function renderHeader() {
 }
 
 function updateMidnightCountdown() {
-  const el = document.getElementById('midnightCountdown');
+  const el = document.getElementById('midnightCountdownText');
   if (!el) return;
   const now = new Date();
   const midnight = new Date(now);
@@ -149,11 +161,10 @@ function updateMidnightCountdown() {
   const mins = Math.floor((diffMs % 3600000) / 60000);
   const secs = Math.floor((diffMs % 60000) / 1000);
   const pad = n => String(n).padStart(2, '0');
-  el.textContent = `⏰ 밤 12시 마감까지 ${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+  el.textContent = `자정 마감 ${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
 }
 
-// 이미지 파일을 모바일 업로드에 적합하게 리사이즈 압축 (Canvas)
-function compressImageFile(file, maxWidth = 720, quality = 0.82) {
+function compressImageFile(file, maxWidth = 720, quality = 0.84) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = e => {
@@ -178,33 +189,37 @@ function compressImageFile(file, maxWidth = 720, quality = 0.82) {
 }
 
 function makeQuickSampleFoodPhoto(mealType, c, p, f, memo) {
-  const palettes = {
-    아침: ['#0f766e', '#115e59', '🥗'],
-    점심: ['#1d4ed8', '#1e3a8a', '🍱'],
-    저녁: ['#4338ca', '#312e81', '🥩'],
-    간식: ['#b45309', '#78350f', '🫐']
+  const presets = {
+    아침: ['BREAKFAST', '#E07A5F', '#F2CC8F'],
+    점심: ['LUNCH', '#BC4749', '#E6CCB2'],
+    저녁: ['DINNER', '#F4845F', '#84A59D'],
+    간식: ['SNACK', '#6D597A', '#E56B6F']
   };
-  const [c1, c2, icon] = palettes[mealType] || palettes['아침'];
-  const title = `${mealType} 존다 식단 (탄${c}·단${p}·지${f})`;
-  const sub = memo || '클린 식단 인증 사진';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 480 360">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="${c1}"/>
-        <stop offset="100%" stop-color="${c2}"/>
-      </linearGradient>
-    </defs>
-    <rect width="480" height="360" rx="24" fill="url(#g)"/>
-    <circle cx="240" cy="140" r="70" fill="rgba(255,255,255,0.15)"/>
-    <text x="240" y="164" font-size="64" text-anchor="middle">${icon}</text>
-    <text x="240" y="255" font-family="sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">${title}</text>
-    <text x="240" y="292" font-family="sans-serif" font-size="17" fill="rgba(255,255,255,0.85)" text-anchor="middle">${sub}</text>
+  const [label, c1, c2] = presets[mealType] || presets['아침'];
+  const macroTag = `${formatBlock(c)} · ${formatBlock(p)} · ${formatBlock(f)} BLOCK`;
+  const sub = memo || `${mealType} 존 다이어트 식단`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450">
+    <rect width="600" height="450" fill="#18191C"/>
+    <circle cx="300" cy="210" r="168" fill="#23252A"/>
+    <circle cx="300" cy="210" r="144" fill="#F7F7F5" stroke="#E4E4E0" stroke-width="4"/>
+    <line x1="300" y1="66" x2="300" y2="354" stroke="#E5E5E0" stroke-width="2" stroke-dasharray="4 4"/>
+    <line x1="300" y1="210" x2="444" y2="210" stroke="#E5E5E0" stroke-width="2" stroke-dasharray="4 4"/>
+    <circle cx="232" cy="185" r="46" fill="${c1}" opacity="0.88"/>
+    <circle cx="242" cy="256" r="34" fill="#4D7C5D" opacity="0.85"/>
+    <rect x="322" y="128" width="68" height="54" rx="22" fill="${c2}" opacity="0.9"/>
+    <circle cx="356" cy="264" r="36" fill="#D9A05B" opacity="0.9"/>
+    <rect x="28" y="26" width="96" height="32" rx="16" fill="rgba(255,255,255,0.1)"/>
+    <text x="76" y="47" font-family="Pretendard, -apple-system, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF" text-anchor="middle">${label}</text>
+    <rect x="444" y="26" width="128" height="32" rx="16" fill="#C8F904"/>
+    <text x="508" y="47" font-family="Pretendard, -apple-system, sans-serif" font-size="13" font-weight="800" fill="#111315" text-anchor="middle">${macroTag}</text>
+    <rect x="0" y="376" width="600" height="74" fill="rgba(17,19,21,0.86)"/>
+    <text x="32" y="420" font-family="Pretendard, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#F4F5F7">${sub}</text>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 // ============================================================================
-// 메인 화면 렌더링 분기
+// 메인 화면 렌더링
 // ============================================================================
 function renderMain() {
   const container = document.getElementById('mainView');
@@ -228,7 +243,7 @@ function renderMain() {
 }
 
 // ============================================================================
-// TAB 1: 식단 · 블록 기록
+// TAB 1: 식단 기록
 // ============================================================================
 function renderDietTab(container) {
   const user = getCurrentUser();
@@ -242,34 +257,33 @@ function renderDietTab(container) {
   const maxPenalties = AppState.db.settings?.maxPenaltyCount || 10;
   const penaltyCount = Math.min(maxPenalties, myPenalties.length);
 
-  const macroRowsHtml = [
-    { key: 'carb', label: '탄수화물 (C)', val: totals.carb, color: 'var(--carb-color)', unitInfo: '1블록 = 9g' },
-    { key: 'protein', label: '단백질 (P)', val: totals.protein, color: 'var(--protein-color)', unitInfo: '1블록 = 7g' },
-    { key: 'fat', label: '지방 (F)', val: totals.fat, color: 'var(--fat-color)', unitInfo: '1블록 = 1.5g' }
+  const macroCellsHtml = [
+    { key: 'carb', label: '탄수화물 C', val: totals.carb, color: '#38BDF8', unit: '9g/블록' },
+    { key: 'protein', label: '단백질 P', val: totals.protein, color: '#C8F904', unit: '7g/블록' },
+    { key: 'fat', label: '지방 F', val: totals.fat, color: '#FBBF24', unit: '1.5g/블록' }
   ]
     .map(m => {
       const pct = Math.min(100, Math.round((m.val / Math.max(target, 1)) * 100));
       const overThis = m.val > target;
       const remain = target - m.val;
-      const statusText = overThis
-        ? `<span style="color:#fca5a5;">+${formatBlock(m.val - target)}블록 초과 ⚠️</span>`
+      const footLabel = overThis
+        ? `<span style="color:#FF6B57;">+${formatBlock(m.val - target)}B 초과</span>`
         : remain === 0
-        ? `<span style="color:#6ee7b7;">목표 달성 ✅</span>`
-        : `<span style="color:#94a3b8;">남은 블록 ${formatBlock(remain)}</span>`;
+        ? `<span style="color:#C8F904;">목표 달성</span>`
+        : `잔여 ${formatBlock(remain)}B`;
 
       return `
-        <div class="macro-row">
-          <div class="macro-label-line">
-            <span>${m.label} <small style="color:var(--text-muted);font-weight:600;">(${m.unitInfo})</small></span>
-            <span>
-              <strong style="color:${overThis ? '#fca5a5' : '#fff'};font-size:15px;">${formatBlock(m.val)}</strong>
-              <span style="color:var(--text-sub);"> / ${target}블록</span>
-              &nbsp;·&nbsp; ${statusText}
-            </span>
+        <div class="hero-macro-cell">
+          <div class="hero-macro-label">
+            <span>${m.label}</span>
           </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width:${pct}%;background:${overThis ? 'var(--danger)' : m.color};"></div>
+          <div class="hero-macro-num" style="color:${overThis ? '#FF6B57' : '#FFFFFF'};">
+            ${formatBlock(m.val)}<small>/ ${target}</small>
           </div>
+          <div class="hero-bar-track">
+            <div class="hero-bar-fill" style="width:${pct}%;background:${overThis ? '#FF4E36' : m.color};"></div>
+          </div>
+          <div class="hero-macro-foot">${footLabel}</div>
         </div>
       `;
     })
@@ -278,170 +292,178 @@ function renderDietTab(container) {
   const mf = AppState.mealForm;
 
   container.innerHTML = `
-    <!-- 오늘 내 블록 요약 카드 -->
-    <section class="card">
-      <div class="card-header">
+    <!-- 다크 카본 히어로 요약 카드 -->
+    <section class="card-hero">
+      <div class="card-header" style="margin-bottom:12px;">
         <div>
-          <div class="card-title">
-            <span>📊 ${user.team}조 ${user.name}님의 일일 블록 현황</span>
-          </div>
-          <div class="card-subtitle">${AppState.selectedDate} 기준 · 하루 정해진 목표 각 ${target}블록</div>
+          <div class="section-eyebrow">DAILY ZONE BLOCKS</div>
+          <div class="card-title">${user.team}조 ${user.name} · 목표 ${target}블록</div>
+          <div class="card-subtitle">${AppState.selectedDate.replace(/-/g, '.')} 기준 섭취량</div>
         </div>
-        <span class="badge ${isOver ? 'badge-danger' : meals.length > 0 ? 'badge-ok' : 'badge-warn'}">
-          ${isOver ? '⚠️ 목표 블록 초과' : meals.length > 0 ? '✅ 블록 적정' : '⏳ 기록 전'}
+        <span class="tag ${isOver ? 'tag-danger' : meals.length > 0 ? 'tag-volt' : 'tag-neutral'}">
+          ${isOver ? '목표 초과' : meals.length > 0 ? '정상 범위' : '기록 대기'}
         </span>
       </div>
 
-      <div class="macro-grid">
-        ${macroRowsHtml}
+      <div class="hero-macro-grid">
+        ${macroCellsHtml}
       </div>
 
-      <div class="ratio-summary-box">
-        <span style="color:var(--text-sub);font-weight:700;">⚖️ 오늘 탄:단:지 블록 비율</span>
-        <strong style="color:#fdba74;">${ratioText}</strong>
+      <div class="hero-ratio-bar">
+        <span style="color:#9CA3AF;font-weight:600;">탄 : 단 : 지 블록 비율</span>
+        <strong style="color:#FFFFFF;font-weight:700;">${ratioText}</strong>
       </div>
 
       ${
         isOver
-          ? `<div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--danger-soft);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;font-size:12.5px;font-weight:700;">
-              🚨 하루 목표(${target}블록)를 초과했습니다! 규칙에 따라 초과 시 1만원 패널티 대상이 됩니다.
+          ? `<div style="margin-top:10px;padding:10px 13px;border-radius:11px;background:rgba(255,78,54,0.14);border:1px solid rgba(255,78,54,0.35);color:#FF8575;font-size:12.5px;font-weight:600;">
+              일일 목표(${target}블록)를 초과하여 패널티 부과 대상입니다.
             </div>`
           : ''
       }
 
-      <!-- 밤 12시 전 단톡방 / 네이버 카페 인증 완료 체크 -->
-      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-subtle);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <span style="font-size:12.5px;font-weight:800;color:var(--text-sub);">☑️ 밤 12시 전 필수 보고 체크리스트</span>
-          <span style="font-size:11.5px;color:var(--text-muted);">내 누적 패널티: ${penaltyCount}/${maxPenalties}회 (${formatWon(penaltyCount * 10000)})</span>
+      <!-- 자정 전 필수 인증 스위치 -->
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:700;color:#9CA3AF;">24:00 마감 필수 체크</span>
+          <span style="font-size:11.5px;color:#6B7280;">누적 벌금 ${formatWon(penaltyCount * 10000)} (${penaltyCount}/${maxPenalties}회)</span>
         </div>
-        <div class="cert-check-grid">
-          <button type="button" class="cert-toggle-btn ${log.kakaoReported ? 'done' : ''}" id="btnToggleKakao">
-            <span class="cert-title">${log.kakaoReported ? '✅ 조 단톡방 보고 완료' : '⬜ 조 단톡방 보고 전'}</span>
-            <span class="cert-sub">${log.kakaoReported ? '12시 전 식단·비율 보고됨' : '터치하여 완료 체크 또는 공유탭 이동'}</span>
+        <div class="cert-switch-grid">
+          <button type="button" class="cert-switch-btn ${log.kakaoReported ? 'done' : ''}" id="btnToggleKakao">
+            <div>
+              <div class="cert-switch-label">조 단톡방 보고</div>
+              <div class="cert-switch-sub">${log.kakaoReported ? '보고 완료됨' : '미보고 상태'}</div>
+            </div>
+            <span class="check-circle">${log.kakaoReported ? Icons.check : ''}</span>
           </button>
-          <button type="button" class="cert-toggle-btn ${log.cafePosted ? 'done' : ''}" id="btnToggleCafe">
-            <span class="cert-title">${log.cafePosted ? '✅ 네이버 카페 업로드 완료' : '⬜ 네이버 카페 작성 전'}</span>
-            <span class="cert-sub">${log.cafePosted ? '12시 전 카페 게시글 완료됨' : '터치하여 완료 체크 또는 공유탭 이동'}</span>
+          <button type="button" class="cert-switch-btn ${log.cafePosted ? 'done' : ''}" id="btnToggleCafe">
+            <div>
+              <div class="cert-switch-label">네이버 카페 인증</div>
+              <div class="cert-switch-sub">${log.cafePosted ? '작성 완료됨' : '미작성 상태'}</div>
+            </div>
+            <span class="check-circle">${log.cafePosted ? Icons.check : ''}</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- 끼니별 식단 사진 & 탄단지 블록 입력 카드 -->
+    <!-- 끼니 입력 카드 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">
-            <span>🍽️ ${mf.editingId ? '끼니 기록 수정하기' : '끼니 식단 & 블록 간편 추가'}</span>
-          </div>
-          <div class="card-subtitle">끼니 사진과 탄·단·지 블록 수만 간단히 선택하세요</div>
+          <div class="section-eyebrow">MEAL ENTRY</div>
+          <div class="card-title">${mf.editingId ? '끼니 기록 수정' : '식단 및 블록 기록'}</div>
         </div>
         ${
           mf.editingId
-            ? `<button type="button" class="btn btn-secondary btn-sm" id="btnCancelEditMeal">수정 취소</button>`
+            ? `<button type="button" class="btn btn-secondary btn-sm" id="btnCancelEditMeal">취소</button>`
             : ''
         }
       </div>
 
-      <!-- 끼니 구분 탭 -->
-      <div class="meal-type-tabs">
+      <!-- 끼니 세그먼트 탭 -->
+      <div class="segmented-tabs">
         ${['아침', '점심', '저녁', '간식']
           .map(
             t =>
-              `<button type="button" class="meal-type-tab ${mf.type === t ? 'active' : ''}" data-meal-type="${t}">${t}</button>`
+              `<button type="button" class="seg-tab ${mf.type === t ? 'active' : ''}" data-meal-type="${t}">${t}</button>`
           )
           .join('')}
       </div>
 
-      <!-- 원터치 1:1:1 블록 프리셋 -->
-      <div style="font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:6px;">
-        ⚡ 원터치 정석 블록 선택 (탄·단·지 동일 세팅)
+      <!-- 1:1:1 빠른 블록 선택 -->
+      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:8px;">
+        균형 블록 빠른 선택 (탄·단·지 동일 적용)
       </div>
-      <div class="quick-preset-row">
+      <div class="preset-strip">
         ${[1, 2, 3, 3.5, 4, 5]
           .map(
             b =>
-              `<button type="button" class="preset-chip ${
+              `<button type="button" class="preset-pill ${
                 mf.carb === b && mf.protein === b && mf.fat === b ? 'active' : ''
-              }" data-preset-block="${b}">${b}블록씩</button>`
+              }" data-preset-block="${b}">${b}블록</button>`
           )
           .join('')}
       </div>
 
-      <!-- 탄 / 단 / 지 개별 블록 조절 -->
-      <div class="block-stepper-grid">
-        <div class="stepper-box">
-          <div class="stepper-title" style="color:var(--carb-color);">탄수화물(C)</div>
-          <div class="stepper-val" id="valCarb">${formatBlock(mf.carb)}<small style="font-size:12px;color:var(--text-sub);">블록</small></div>
-          <div class="stepper-btns">
+      <!-- 탄 / 단 / 지 개별 스테퍼 -->
+      <div class="stepper-grid">
+        <div class="stepper-card">
+          <div class="stepper-label">탄수화물 C</div>
+          <div class="stepper-value">${formatBlock(mf.carb)}<small>B</small></div>
+          <div class="stepper-actions">
             <button type="button" data-step-macro="carb" data-step-delta="-0.5">-0.5</button>
             <button type="button" data-step-macro="carb" data-step-delta="0.5">+0.5</button>
           </div>
         </div>
-        <div class="stepper-box">
-          <div class="stepper-title" style="color:var(--protein-color);">단백질(P)</div>
-          <div class="stepper-val" id="valProtein">${formatBlock(mf.protein)}<small style="font-size:12px;color:var(--text-sub);">블록</small></div>
-          <div class="stepper-btns">
+        <div class="stepper-card">
+          <div class="stepper-label">단백질 P</div>
+          <div class="stepper-value">${formatBlock(mf.protein)}<small>B</small></div>
+          <div class="stepper-actions">
             <button type="button" data-step-macro="protein" data-step-delta="-0.5">-0.5</button>
             <button type="button" data-step-macro="protein" data-step-delta="0.5">+0.5</button>
           </div>
         </div>
-        <div class="stepper-box">
-          <div class="stepper-title" style="color:var(--fat-color);">지방(F)</div>
-          <div class="stepper-val" id="valFat">${formatBlock(mf.fat)}<small style="font-size:12px;color:var(--text-sub);">블록</small></div>
-          <div class="stepper-btns">
+        <div class="stepper-card">
+          <div class="stepper-label">지방 F</div>
+          <div class="stepper-value">${formatBlock(mf.fat)}<small>B</small></div>
+          <div class="stepper-actions">
             <button type="button" data-step-macro="fat" data-step-delta="-0.5">-0.5</button>
             <button type="button" data-step-macro="fat" data-step-delta="0.5">+0.5</button>
           </div>
         </div>
       </div>
 
-      <!-- 식단 사진 업로드 -->
-      <div class="photo-upload-box" id="photoUploadTrigger">
+      <!-- 사진 업로드 -->
+      <div class="photo-dropzone" id="photoUploadTrigger">
         <input type="file" id="mealPhotoInput" accept="image/*" style="display:none;" />
-        <div style="font-size:13.5px;font-weight:800;color:#fdba74;">📷 식단 사진 촬영 또는 앨범에서 선택</div>
-        <div style="font-size:11.5px;color:var(--text-sub);margin-top:2px;">사진을 등록하면 네이버 카페·단톡방 요약 카드가 자동으로 만들어집니다</div>
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--text-primary);">
+          ${Icons.camera}
+          <span>식단 사진 첨부</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px;">
+          등록한 사진은 일일 요약 카드 이미지로 자동 병합됩니다
+        </div>
         ${
           mf.photoDataUrl
             ? `<img src="${mf.photoDataUrl}" class="photo-preview-img" alt="식단 미리보기" />`
             : ''
         }
       </div>
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:-6px;margin-bottom:12px;">
-        <button type="button" class="btn btn-secondary btn-sm" id="btnUseSamplePhoto">🥗 샘플 식단 이미지 자동 채우기</button>
+
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:12px;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnUseSamplePhoto">플레이트 그래픽 자동 적용</button>
         ${
           mf.photoDataUrl
-            ? `<button type="button" class="btn btn-danger btn-sm" id="btnClearPhoto">사진 지우기</button>`
+            ? `<button type="button" class="btn btn-danger btn-sm" id="btnClearPhoto">사진 삭제</button>`
             : ''
         }
       </div>
 
-      <!-- 식단 메모 -->
-      <div style="margin-bottom:12px;">
+      <div style="margin-bottom:14px;">
         <input type="text" class="input-field" id="mealMemoInput" placeholder="식단 메모 (예: 닭가슴살 100g, 현미밥, 아몬드)" value="${
           mf.memo || ''
         }" />
       </div>
 
       <button type="button" class="btn btn-primary btn-block" id="btnSaveMeal">
-        ${mf.editingId ? '💾 끼니 수정 완료' : '➕ 오늘 식단에 이 끼니 추가하기'}
+        ${mf.editingId ? '끼니 수정 저장' : '오늘 식단에 추가'}
       </button>
     </section>
 
-    <!-- 오늘 등록된 끼니 리스트 -->
+    <!-- 오늘 기록된 끼니 리스트 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">📋 오늘 기록한 식단 목록 (${meals.length}끼)</div>
-          <div class="card-subtitle">등록 후 아래 공유 버튼으로 단톡방·카페 양식을 1초 만에 복사하세요</div>
+          <div class="section-eyebrow">TODAY'S LOGS</div>
+          <div class="card-title">기록된 끼니 (${meals.length})</div>
         </div>
       </div>
 
       ${
         meals.length === 0
-          ? `<div style="text-align:center;padding:24px 12px;color:var(--text-sub);font-size:13.5px;">
-              아직 오늘 등록된 끼니가 없습니다.<br/>위에서 아침·점심·저녁 식단과 블록을 추가해보세요!
+          ? `<div style="text-align:center;padding:28px 12px;color:var(--text-tertiary);font-size:13.5px;">
+              아직 기록된 끼니가 없습니다.
             </div>`
           : `<div class="meal-list">
               ${meals
@@ -451,13 +473,13 @@ function renderDietTab(container) {
                   ${
                     m.photoDataUrl
                       ? `<img src="${m.photoDataUrl}" class="meal-thumb" alt="${m.type}" />`
-                      : `<div class="meal-thumb" style="display:flex;align-items:center;justify-content:center;font-size:24px;">🥗</div>`
+                      : `<div class="meal-thumb"></div>`
                   }
                   <div class="meal-info">
                     <div class="meal-info-top">
-                      <span class="badge badge-accent">${m.type} ${m.time ? `· ${m.time}` : ''}</span>
-                      <div style="display:flex;gap:6px;">
-                        <button type="button" class="btn btn-secondary btn-sm" data-edit-meal="${m.id}">수정</button>
+                      <span class="tag tag-neutral">${m.type}${m.time ? ` · ${m.time}` : ''}</span>
+                      <div style="display:flex;gap:5px;">
+                        <button type="button" class="btn btn-outline btn-sm" data-edit-meal="${m.id}">수정</button>
                         <button type="button" class="btn btn-danger btn-sm" data-delete-meal="${m.id}">삭제</button>
                       </div>
                     </div>
@@ -474,8 +496,9 @@ function renderDietTab(container) {
       }
 
       <div style="margin-top:16px;">
-        <button type="button" class="btn btn-success btn-block" id="btnGoShareTab">
-          📤 네이버 카페 · 조별 단톡방 요약카드 & 텍스트 복사하러 가기 →
+        <button type="button" class="btn btn-outline btn-block" id="btnGoShareTab">
+          <span>인증 카드 생성 및 카페·단톡 공유</span>
+          ${Icons.arrowRight}
         </button>
       </div>
     </section>
@@ -485,14 +508,13 @@ function renderDietTab(container) {
 }
 
 function bindDietTabEvents(user, log) {
-  // 단톡방 / 카페 완료 토글
   document.getElementById('btnToggleKakao')?.addEventListener('click', async () => {
     await apiRequest('/api/daily-status', 'POST', {
       userId: user.id,
       date: AppState.selectedDate,
       kakaoReported: !log.kakaoReported
     });
-    showToast(!log.kakaoReported ? '💬 조 단톡방 보고 완료로 체크되었습니다!' : '단톡방 보고 체크가 해제되었습니다.');
+    showToast(!log.kakaoReported ? '조 단톡방 보고 완료로 변경되었습니다' : '단톡방 보고 체크가 해제되었습니다');
     await loadState();
   });
 
@@ -502,11 +524,10 @@ function bindDietTabEvents(user, log) {
       date: AppState.selectedDate,
       cafePosted: !log.cafePosted
     });
-    showToast(!log.cafePosted ? '☕ 네이버 카페 업로드 완료로 체크되었습니다!' : '네이버 카페 체크가 해제되었습니다.');
+    showToast(!log.cafePosted ? '네이버 카페 인증 완료로 변경되었습니다' : '네이버 카페 체크가 해제되었습니다');
     await loadState();
   });
 
-  // 끼니 종류 선택
   document.querySelectorAll('[data-meal-type]').forEach(btn => {
     btn.addEventListener('click', () => {
       AppState.mealForm.type = btn.dataset.mealType;
@@ -514,7 +535,6 @@ function bindDietTabEvents(user, log) {
     });
   });
 
-  // 원터치 블록 프리셋
   document.querySelectorAll('[data-preset-block]').forEach(btn => {
     btn.addEventListener('click', () => {
       const val = Number(btn.dataset.presetBlock);
@@ -525,7 +545,6 @@ function bindDietTabEvents(user, log) {
     });
   });
 
-  // 개별 탄단지 증감
   document.querySelectorAll('[data-step-macro]').forEach(btn => {
     btn.addEventListener('click', () => {
       const macro = btn.dataset.stepMacro;
@@ -536,13 +555,11 @@ function bindDietTabEvents(user, log) {
     });
   });
 
-  // 메모 동기화
   const memoInput = document.getElementById('mealMemoInput');
   memoInput?.addEventListener('input', e => {
     AppState.mealForm.memo = e.target.value;
   });
 
-  // 사진 업로드
   const photoTrigger = document.getElementById('photoUploadTrigger');
   const photoInput = document.getElementById('mealPhotoInput');
   photoTrigger?.addEventListener('click', () => photoInput?.click());
@@ -552,18 +569,17 @@ function bindDietTabEvents(user, log) {
     try {
       const dataUrl = await compressImageFile(file);
       AppState.mealForm.photoDataUrl = dataUrl;
-      showToast('📷 식단 사진이 첨부되었습니다!');
+      showToast('식단 사진이 첨부되었습니다');
       renderMain();
     } catch (err) {
-      showToast('사진을 불러오지 못했습니다.');
+      showToast('사진을 불러오지 못했습니다');
     }
   });
 
-  // 샘플 사진 채우기
   document.getElementById('btnUseSamplePhoto')?.addEventListener('click', () => {
     const mf = AppState.mealForm;
     mf.photoDataUrl = makeQuickSampleFoodPhoto(mf.type, mf.carb, mf.protein, mf.fat, mf.memo);
-    showToast('🥗 샘플 식단 이미지가 적용되었습니다!');
+    showToast('플레이트 그래픽이 적용되었습니다');
     renderMain();
   });
 
@@ -585,7 +601,6 @@ function bindDietTabEvents(user, log) {
     renderMain();
   });
 
-  // 끼니 저장
   document.getElementById('btnSaveMeal')?.addEventListener('click', async () => {
     const mf = AppState.mealForm;
     const now = new Date();
@@ -608,7 +623,7 @@ function bindDietTabEvents(user, log) {
       }
     });
 
-    showToast(mf.editingId ? '✅ 끼니 기록이 수정되었습니다!' : '✅ 오늘 식단에 끼니가 추가되었습니다!');
+    showToast(mf.editingId ? '끼니 기록이 수정되었습니다' : '식단이 추가되었습니다');
     AppState.mealForm = {
       editingId: null,
       type: mf.type === '아침' ? '점심' : mf.type === '점심' ? '저녁' : '간식',
@@ -621,7 +636,6 @@ function bindDietTabEvents(user, log) {
     await loadState();
   });
 
-  // 끼니 수정 / 삭제
   document.querySelectorAll('[data-edit-meal]').forEach(btn => {
     btn.addEventListener('click', () => {
       const mealId = btn.dataset.editMeal;
@@ -636,7 +650,7 @@ function bindDietTabEvents(user, log) {
         memo: targetMeal.memo || '',
         photoDataUrl: targetMeal.photoDataUrl || ''
       };
-      window.scrollTo({ top: 180, behavior: 'smooth' });
+      window.scrollTo({ top: 200, behavior: 'smooth' });
       renderMain();
     });
   });
@@ -649,7 +663,7 @@ function bindDietTabEvents(user, log) {
         date: AppState.selectedDate,
         mealId
       });
-      showToast('🗑️ 끼니 기록이 삭제되었습니다.');
+      showToast('끼니 기록이 삭제되었습니다');
       await loadState();
     });
   });
@@ -662,7 +676,7 @@ function bindDietTabEvents(user, log) {
 }
 
 // ============================================================================
-// TAB 2: 네이버 카페 · 조별 단톡방 공유 카드 & 텍스트 자동 생성
+// TAB 2: 인증 카드 & 카페·단톡 공유
 // ============================================================================
 async function renderShareTab(container) {
   const user = getCurrentUser();
@@ -694,12 +708,13 @@ async function renderShareTab(container) {
   });
 
   container.innerHTML = `
-    <!-- 1. 하루 식단 요약 카드 이미지 생성기 -->
+    <!-- 1. 에디토리얼 요약 카드 이미지 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">🖼️ 오늘의 식단 요약 카드 이미지 (한 장으로 합치기)</div>
-          <div class="card-subtitle">끼니 사진 여러 장을 따로 올릴 필요 없이 이 요약 카드 한 장만 저장해 카페·단톡방에 올리세요!</div>
+          <div class="section-eyebrow">SUMMARY CARD</div>
+          <div class="card-title">일일 식단 인증 카드</div>
+          <div class="card-subtitle">오늘 기록한 끼니 사진과 블록 현황을 한 장의 이미지로 저장합니다</div>
         </div>
       </div>
 
@@ -709,66 +724,73 @@ async function renderShareTab(container) {
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
         <button type="button" class="btn btn-primary" id="btnDownloadCardImg">
-          📥 요약 카드 이미지 저장
+          ${Icons.download}
+          <span>이미지 저장</span>
         </button>
-        <button type="button" class="btn btn-success" id="btnNativeShareCard">
-          📲 폰에서 카톡·카페 바로 공유
+        <button type="button" class="btn btn-secondary" id="btnNativeShareCard">
+          ${Icons.share}
+          <span>모바일 공유</span>
         </button>
       </div>
     </section>
 
-    <!-- 2. 조별 단톡방 보고용 텍스트 원클릭 복사 -->
+    <!-- 2. 조별 단톡방 보고 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">💬 ${user.team}조 단톡방 보고 양식 복사</div>
-          <div class="card-subtitle">오늘 먹은 식단과 탄·단·지 비율이 자동 계산된 단톡방 보고 문구입니다</div>
+          <div class="section-eyebrow">TEAM CHAT REPORT</div>
+          <div class="card-title">${user.team}조 단톡방 보고 문구</div>
+          <div class="card-subtitle">복사 시 단톡방 보고 완료 상태로 자동 전환됩니다</div>
         </div>
-        <span class="badge ${log.kakaoReported ? 'badge-ok' : 'badge-warn'}">
-          ${log.kakaoReported ? '✅ 단톡 보고완료' : '⏳ 보고 전'}
+        <span class="tag ${log.kakaoReported ? 'tag-ok' : 'tag-neutral'}">
+          ${log.kakaoReported ? '보고 완료' : '보고 전'}
         </span>
       </div>
 
       <div class="copy-preview" id="kakaoTextPreview">${kakaoText}</div>
 
       <button type="button" class="btn btn-primary btn-block" id="btnCopyKakao">
-        📋 단톡방 보고 문구 복사 + '단톡 보고완료' 자동 체크
+        ${Icons.copy}
+        <span>단톡방 문구 복사 및 보고 완료 체크</span>
       </button>
     </section>
 
-    <!-- 3. 네이버 크로스핏 카페 업로드용 양식 복사 -->
+    <!-- 3. 네이버 카페 게시글 양식 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">☕ 네이버 카페 게시글 양식 복사 (밤 12시 전)</div>
-          <div class="card-subtitle">카페 글쓰기에서 제목과 본문을 붙여넣고 위의 요약 카드 사진을 첨부하세요</div>
+          <div class="section-eyebrow">NAVER CAFE POST</div>
+          <div class="card-title">네이버 카페 게시글 양식</div>
+          <div class="card-subtitle">24:00 전까지 카페에 제목·본문과 인증 카드를 업로드하세요</div>
         </div>
-        <span class="badge ${log.cafePosted ? 'badge-ok' : 'badge-warn'}">
-          ${log.cafePosted ? '✅ 카페 업로드완료' : '⏳ 작성 전'}
+        <span class="tag ${log.cafePosted ? 'tag-ok' : 'tag-neutral'}">
+          ${log.cafePosted ? '업로드 완료' : '작성 전'}
         </span>
       </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:4px;">📌 카페 게시글 제목</div>
-      <div class="copy-preview" style="max-height:70px;margin-top:0;">${cafeTitle}</div>
-      <button type="button" class="btn btn-secondary btn-block" id="btnCopyCafeTitle" style="margin-bottom:12px;">
-        📋 카페 게시글 [제목] 복사하기
+      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:4px;">게시글 제목</div>
+      <div class="copy-preview" style="max-height:68px;margin-top:0;">${cafeTitle}</div>
+      <button type="button" class="btn btn-secondary btn-block" id="btnCopyCafeTitle" style="margin-bottom:14px;">
+        ${Icons.copy}
+        <span>제목 복사</span>
       </button>
 
-      <div style="font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:4px;">📝 카페 게시글 본문 (탄단지 블록 상세)</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:4px;">게시글 본문</div>
       <div class="copy-preview" style="margin-top:0;">${cafeBody}</div>
 
       <div style="display:grid;grid-template-columns:1fr;gap:8px;">
-        <button type="button" class="btn btn-success btn-block" id="btnCopyCafeBody">
-          📋 카페 게시글 [본문] 복사 + '카페 업로드완료' 자동 체크
+        <button type="button" class="btn btn-primary btn-block" id="btnCopyCafeBody">
+          ${Icons.copy}
+          <span>본문 복사 및 카페 인증 완료 체크</span>
         </button>
-        <a href="${settings.cafeUrl || 'https://cafe.naver.com/'}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
-          🌐 네이버 크로스핏 카페 바로 열기 ↗
+        <a href="${settings.cafeUrl || 'https://cafe.naver.com/'}" target="_blank" rel="noopener" class="btn btn-outline btn-block">
+          <span>네이버 카페 열기</span>
+          ${Icons.external}
         </a>
       </div>
     </section>
   `;
 
-  // Canvas 렌더링
   const canvas = document.getElementById('summaryCardCanvas');
   if (canvas) {
     await window.ZoneShareHelper.renderSummaryCardCanvas(canvas, {
@@ -780,22 +802,20 @@ async function renderShareTab(container) {
     });
   }
 
-  // 요약 카드 PNG 다운로드
   document.getElementById('btnDownloadCardImg')?.addEventListener('click', () => {
     if (!canvas) return;
     const link = document.createElement('a');
-    link.download = `레벤존다_${user.team}조_${user.name}_${AppState.selectedDate}.png`;
+    link.download = `LEBEN_ZONE_${user.team}조_${user.name}_${AppState.selectedDate}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
-    showToast('📥 오늘의 식단 요약 카드 이미지가 저장되었습니다!');
+    showToast('인증 카드 이미지가 저장되었습니다');
   });
 
-  // 모바일 네이티브 공유 (Web Share API)
   document.getElementById('btnNativeShareCard')?.addEventListener('click', async () => {
     if (!canvas) return;
     try {
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      const file = new File([blob], `레벤존다_${user.team}조_${user.name}_${AppState.selectedDate}.png`, {
+      const file = new File([blob], `LEBEN_ZONE_${user.team}조_${user.name}_${AppState.selectedDate}.png`, {
         type: 'image/png'
       });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -804,22 +824,18 @@ async function renderShareTab(container) {
           text: kakaoText,
           files: [file]
         });
-        showToast('📲 공유 창이 열렸습니다!');
       } else {
-        await copyToClipboard(kakaoText, '📋 문구가 복사되었으며 요약 카드 이미지를 다운로드합니다!');
+        await copyToClipboard(kakaoText, '문구가 복사되었으며 이미지를 저장합니다');
         const link = document.createElement('a');
-        link.download = `레벤존다_${user.team}조_${user.name}_${AppState.selectedDate}.png`;
+        link.download = `LEBEN_ZONE_${user.team}조_${user.name}_${AppState.selectedDate}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       }
-    } catch (e) {
-      // 사용자가 공유 창 닫은 경우 무시
-    }
+    } catch (e) {}
   });
 
-  // 단톡방 복사 + 완료 체크
   document.getElementById('btnCopyKakao')?.addEventListener('click', async () => {
-    await copyToClipboard(kakaoText, '💬 단톡방 보고 문구가 복사되었습니다! 단톡방에 붙여넣기 하세요.');
+    await copyToClipboard(kakaoText, '단톡방 보고 문구가 복사되었습니다');
     await apiRequest('/api/daily-status', 'POST', {
       userId: user.id,
       date: AppState.selectedDate,
@@ -828,14 +844,12 @@ async function renderShareTab(container) {
     await loadState();
   });
 
-  // 카페 제목 복사
   document.getElementById('btnCopyCafeTitle')?.addEventListener('click', async () => {
-    await copyToClipboard(cafeTitle, '📋 네이버 카페 게시글 제목이 복사되었습니다!');
+    await copyToClipboard(cafeTitle, '카페 게시글 제목이 복사되었습니다');
   });
 
-  // 카페 본문 복사 + 완료 체크
   document.getElementById('btnCopyCafeBody')?.addEventListener('click', async () => {
-    await copyToClipboard(cafeBody, '☕ 카페 본문이 복사되었고 [카페 업로드완료]로 체크되었습니다!');
+    await copyToClipboard(cafeBody, '카페 본문이 복사되었으며 인증 완료로 체크되었습니다');
     await apiRequest('/api/daily-status', 'POST', {
       userId: user.id,
       date: AppState.selectedDate,
@@ -846,7 +860,7 @@ async function renderShareTab(container) {
 }
 
 // ============================================================================
-// TAB 3: 조별 현황 (5개 조 x 4명 = 20명 실시간 보드 & 피드)
+// TAB 3: 조별 현황 (5개 조 x 4명 = 20명)
 // ============================================================================
 function renderTeamsTab(container) {
   const participants = AppState.db.participants || [];
@@ -900,37 +914,43 @@ function renderTeamsTab(container) {
               <div class="member-row-top">
                 <div class="member-name-wrap">
                   <span>${m.name}</span>
-                  <span class="badge ${m.role === '조장' ? 'badge-accent' : ''}" style="font-size:10.5px;padding:2px 6px;">${
-            m.role || '조원'
-          }</span>
-                  <span style="font-size:12px;color:var(--text-sub);font-weight:600;">목표 ${m.targetBlocks}블록</span>
+                  ${
+                    m.role === '조장'
+                      ? `<span class="tag tag-dark" style="font-size:10px;padding:2px 7px;">조장</span>`
+                      : ''
+                  }
+                  <span style="font-size:12px;color:var(--text-tertiary);font-weight:600;">목표 ${m.targetBlocks}B</span>
                 </div>
-                <span style="font-size:12px;font-weight:800;color:${
-                  isOver ? '#fca5a5' : meals.length > 0 ? '#fdba74' : 'var(--text-muted)'
+                <span style="font-size:12.5px;font-weight:800;color:${
+                  isOver ? 'var(--signal)' : meals.length > 0 ? 'var(--text-primary)' : 'var(--text-tertiary)'
                 };">
                   ${
                     meals.length > 0
-                      ? `탄${formatBlock(totals.carb)}·단${formatBlock(totals.protein)}·지${formatBlock(totals.fat)}`
-                      : '식단 미입력'
+                      ? `C ${formatBlock(totals.carb)} · P ${formatBlock(totals.protein)} · F ${formatBlock(totals.fat)}`
+                      : '미기록'
                   }
                 </span>
               </div>
               <div class="member-checks">
-                <span class="check-pill ${meals.length > 0 && !isOver ? 'ok' : isOver ? 'missing' : ''}">
-                  ${isOver ? '⚠️ 블록초과' : meals.length > 0 ? `🥗 ${meals.length}끼 기록` : '⏳ 식단 미기록'}
+                <span class="status-chip ${meals.length > 0 && !isOver ? 'ok' : isOver ? 'missing' : ''}">
+                  <span class="dot"></span>
+                  <span>${isOver ? '블록 초과' : meals.length > 0 ? `${meals.length}끼 기록` : '식단 대기'}</span>
                 </span>
-                <span class="check-pill ${l.kakaoReported ? 'ok' : 'missing'}">
-                  ${l.kakaoReported ? '💬 단톡완료' : '💬 단톡미보고'}
+                <span class="status-chip ${l.kakaoReported ? 'ok' : 'missing'}">
+                  <span class="dot"></span>
+                  <span>${l.kakaoReported ? '단톡 완료' : '단톡 미보고'}</span>
                 </span>
-                <span class="check-pill ${l.cafePosted ? 'ok' : 'missing'}">
-                  ${l.cafePosted ? '☕ 카페완료' : '☕ 카페미작성'}
+                <span class="status-chip ${l.cafePosted ? 'ok' : 'missing'}">
+                  <span class="dot"></span>
+                  <span>${l.cafePosted ? '카페 완료' : '카페 미작성'}</span>
                 </span>
-                <span class="check-pill ${missionDone ? 'ok' : ''}">
-                  ${missionDone ? '🏋️ 주간미션완료' : '🏋️ 주간미션전'}
+                <span class="status-chip ${missionDone ? 'ok' : ''}">
+                  <span class="dot"></span>
+                  <span>${missionDone ? '주간미션 완료' : '미션 진행중'}</span>
                 </span>
                 ${
                   pCount > 0
-                    ? `<span class="check-pill missing">🚨 패널티 ${pCount}회</span>`
+                    ? `<span class="status-chip missing"><span class="dot"></span><span>패널티 ${pCount}회</span></span>`
                     : ''
                 }
               </div>
@@ -943,13 +963,15 @@ function renderTeamsTab(container) {
         <section class="card">
           <div class="card-header">
             <div>
-              <div class="card-title">🚩 ${teamNum}조 현황 (${members.length}명)</div>
-              <div class="card-subtitle">조 누적 패널티 ${teamPenalties}회 · 조원을 터치하면 오늘 식단 사진을 볼 수 있습니다</div>
+              <div class="section-eyebrow">TEAM 0${teamNum}</div>
+              <div class="card-title">${teamNum}조 현황 (${members.length}명)</div>
+              <div class="card-subtitle">누적 패널티 ${teamPenalties}회 · 이름을 누르면 식단 상세를 확인합니다</div>
             </div>
             <button type="button" class="btn btn-secondary btn-sm" data-nudge-team="${teamNum}" data-missing-names="${missingMembers.join(
         ', '
       )}">
-              📢 단톡 독촉문구 복사
+              ${Icons.copy}
+              <span>미인증 알림 복사</span>
             </button>
           </div>
           <div class="member-status-list">
@@ -961,35 +983,34 @@ function renderTeamsTab(container) {
     .join('');
 
   container.innerHTML = `
-    <!-- 전체 20명 요약 대시보드 -->
-    <section class="card">
-      <div class="card-header">
+    <section class="card-hero">
+      <div class="card-header" style="margin-bottom:14px;">
         <div>
-          <div class="card-title">📊 전체 5개 조 (${participants.length}명) 오늘 인증 현황</div>
-          <div class="card-subtitle">${date} 밤 12시 마감 기준 실시간 집계</div>
+          <div class="section-eyebrow">LIVE OVERVIEW</div>
+          <div class="card-title">전체 5개 조 (${participants.length}명) 인증 현황</div>
+          <div class="card-subtitle">${date.replace(/-/g, '.')} 24:00 마감 기준</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;">
-        <div style="background:#0b1120;padding:10px 6px;border-radius:12px;border:1px solid var(--border-subtle);">
-          <div style="font-size:11.5px;color:var(--text-sub);font-weight:700;">식단 기록</div>
-          <div style="font-size:18px;font-weight:900;color:#fff;margin-top:3px;">${loggedCount}<small style="font-size:12px;color:var(--text-sub);">/${participants.length}</small></div>
+        <div style="background:var(--bg-carbon-sub);padding:12px 6px;border-radius:13px;">
+          <div style="font-size:11px;color:#9CA3AF;font-weight:600;">식단 기록</div>
+          <div style="font-size:20px;font-weight:800;color:#FFFFFF;margin-top:4px;">${loggedCount}<small style="font-size:12px;color:#6B7280;">/${participants.length}</small></div>
         </div>
-        <div style="background:#0b1120;padding:10px 6px;border-radius:12px;border:1px solid var(--border-subtle);">
-          <div style="font-size:11.5px;color:var(--text-sub);font-weight:700;">단톡방 보고</div>
-          <div style="font-size:18px;font-weight:900;color:#6ee7b7;margin-top:3px;">${kakaoCount}<small style="font-size:12px;color:var(--text-sub);">/${participants.length}</small></div>
+        <div style="background:var(--bg-carbon-sub);padding:12px 6px;border-radius:13px;">
+          <div style="font-size:11px;color:#9CA3AF;font-weight:600;">단톡 보고</div>
+          <div style="font-size:20px;font-weight:800;color:#C8F904;margin-top:4px;">${kakaoCount}<small style="font-size:12px;color:#6B7280;">/${participants.length}</small></div>
         </div>
-        <div style="background:#0b1120;padding:10px 6px;border-radius:12px;border:1px solid var(--border-subtle);">
-          <div style="font-size:11.5px;color:var(--text-sub);font-weight:700;">카페 업로드</div>
-          <div style="font-size:18px;font-weight:900;color:#38bdf8;margin-top:3px;">${cafeCount}<small style="font-size:12px;color:var(--text-sub);">/${participants.length}</small></div>
+        <div style="background:var(--bg-carbon-sub);padding:12px 6px;border-radius:13px;">
+          <div style="font-size:11px;color:#9CA3AF;font-weight:600;">카페 인증</div>
+          <div style="font-size:20px;font-weight:800;color:#38BDF8;margin-top:4px;">${cafeCount}<small style="font-size:12px;color:#6B7280;">/${participants.length}</small></div>
         </div>
-        <div style="background:#0b1120;padding:10px 6px;border-radius:12px;border:1px solid var(--border-subtle);">
-          <div style="font-size:11.5px;color:var(--text-sub);font-weight:700;">블록 초과</div>
-          <div style="font-size:18px;font-weight:900;color:#fca5a5;margin-top:3px;">${overBlockCount}<small style="font-size:12px;color:var(--text-sub);">명</small></div>
+        <div style="background:var(--bg-carbon-sub);padding:12px 6px;border-radius:13px;">
+          <div style="font-size:11px;color:#9CA3AF;font-weight:600;">블록 초과</div>
+          <div style="font-size:20px;font-weight:800;color:#FF6B57;margin-top:4px;">${overBlockCount}<small style="font-size:12px;color:#6B7280;">명</small></div>
         </div>
       </div>
     </section>
 
-    <!-- 조 선택 필터 -->
     <div class="team-filter-bar">
       <button type="button" class="team-chip ${AppState.selectedTeamFilter === 'all' ? 'active' : ''}" data-team-filter="all">전체 5개조</button>
       ${[1, 2, 3, 4, 5]
@@ -997,7 +1018,7 @@ function renderTeamsTab(container) {
           t =>
             `<button type="button" class="team-chip ${
               Number(AppState.selectedTeamFilter) === t ? 'active' : ''
-            }" data-team-filter="${t}">${t}조 (4명)</button>`
+            }" data-team-filter="${t}">${t}조</button>`
         )
         .join('')}
     </div>
@@ -1017,9 +1038,9 @@ function renderTeamsTab(container) {
       const teamNum = btn.dataset.nudgeTeam;
       const missing = btn.dataset.missingNames;
       const msg = missing
-        ? `⏰ [${teamNum}조 밤 12시 마감 알림]\n아직 오늘 식단 단톡 보고 또는 네이버 카페 인증이 완료되지 않은 조원: ${missing}님!\n밤 12시 지나면 1만원 패널티가 부여되니 지금 바로 어플에서 기록 후 올려주세요🔥`
-        : `🎉 [${teamNum}조 전원 인증 완료!]\n오늘 ${teamNum}조 4명 전원 밤 12시 전 식단 및 카페 인증 완료했습니다! 고생하셨습니다💪`;
-      await copyToClipboard(msg, `📢 ${teamNum}조 단톡방 알림 문구가 복사되었습니다!`);
+        ? `[${teamNum}조 24:00 마감 안내]\n아직 오늘 식단 단톡 보고 또는 네이버 카페 업로드가 완료되지 않은 조원: ${missing}님\n자정 이후에는 10,000원 패널티가 부과되니 시간 내 인증 부탁드립니다.`
+        : `[${teamNum}조 전원 인증 완료]\n오늘 ${teamNum}조 4명 전원 식단 및 카페 인증 완료되었습니다. 수고하셨습니다.`;
+      await copyToClipboard(msg, `${teamNum}조 안내 문구가 복사되었습니다`);
     });
   });
 
@@ -1041,20 +1062,22 @@ function openMemberDetailModal(userId) {
   if (!modal || !content) return;
 
   content.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
       <div>
-        <h3 style="font-size:17px;font-weight:900;">${member.team}조 ${member.name}님의 식단 상세</h3>
-        <div style="font-size:12.5px;color:var(--text-sub);">${AppState.selectedDate} · 목표 각 ${
-    member.targetBlocks
-  }블록 (섭취 탄${formatBlock(totals.carb)}·단${formatBlock(totals.protein)}·지${formatBlock(
+        <div class="section-eyebrow">${member.team}조 · 목표 ${member.targetBlocks}블록</div>
+        <h3 style="font-size:18px;font-weight:800;">${member.name}님의 식단 기록</h3>
+        <div style="font-size:12.5px;color:var(--text-tertiary);margin-top:2px;">${AppState.selectedDate.replace(
+          /-/g,
+          '.'
+        )} · 총 탄 ${formatBlock(totals.carb)} / 단 ${formatBlock(totals.protein)} / 지 ${formatBlock(
     totals.fat
-  )})</div>
+  )}</div>
       </div>
       <button type="button" class="btn btn-secondary btn-sm" id="btnCloseInspect">닫기</button>
     </div>
     ${
       meals.length === 0
-        ? `<div style="padding:24px;text-align:center;color:var(--text-sub);">이 날짜에 등록된 식단이 없습니다.</div>`
+        ? `<div style="padding:28px 12px;text-align:center;color:var(--text-tertiary);font-size:13.5px;">등록된 끼니 기록이 없습니다.</div>`
         : `<div class="meal-list">
             ${meals
               .map(
@@ -1063,10 +1086,10 @@ function openMemberDetailModal(userId) {
                 ${
                   m.photoDataUrl
                     ? `<img src="${m.photoDataUrl}" class="meal-thumb" alt="${m.type}" />`
-                    : `<div class="meal-thumb">🥗</div>`
+                    : `<div class="meal-thumb"></div>`
                 }
                 <div class="meal-info">
-                  <span class="badge badge-accent">${m.type} ${m.time || ''}</span>
+                  <span class="tag tag-neutral">${m.type} ${m.time || ''}</span>
                   <div class="meal-blocks-tag">탄 ${formatBlock(m.carb)} · 단 ${formatBlock(
                   m.protein
                 )} · 지 ${formatBlock(m.fat)} 블록</div>
@@ -1078,9 +1101,9 @@ function openMemberDetailModal(userId) {
               .join('')}
           </div>`
     }
-    <div style="margin-top:14px;">
+    <div style="margin-top:16px;">
       <button type="button" class="btn btn-primary btn-block" id="btnSwitchToThisMember">
-        👤 ${member.team}조 ${member.name}(으)로 사용자 전환하기
+        ${member.team}조 ${member.name} 계정으로 전환
       </button>
     </div>
   `;
@@ -1096,7 +1119,7 @@ function openMemberDetailModal(userId) {
 }
 
 // ============================================================================
-// TAB 4: 주간 미션 운동 & 패널티 (1만원 벌금 / 최대 10번 한도)
+// TAB 4: 주간 미션 & 패널티/벌금 트래커
 // ============================================================================
 function renderPenaltyTab(container) {
   const user = getCurrentUser();
@@ -1110,7 +1133,6 @@ function renderPenaltyTab(container) {
     m => m.weekLabel === wm.weekLabel
   );
 
-  // 개인별 패널티 집계 (최대 10회 한도 적용)
   const participantPenaltyStats = (AppState.db.participants || []).map(p => {
     const list = getUserPenalties(p.id);
     const rawCount = list.length;
@@ -1133,57 +1155,57 @@ function renderPenaltyTab(container) {
   };
 
   const penaltyTypeLabels = {
-    OVER_BLOCK: '⚠️ 일일 블록 초과',
-    NO_CAFE: '☕ 카페 12시전 미작성',
-    NO_KAKAO: '💬 단톡 12시전 미보고',
-    NO_MISSION: '🏋️ 주간 미션운동 미수행',
-    MANUAL: '📌 운영진 부여'
+    OVER_BLOCK: '일일 블록 초과',
+    NO_CAFE: '카페 자정 미작성',
+    NO_KAKAO: '단톡 자정 미보고',
+    NO_MISSION: '주간 미션 미수행',
+    MANUAL: '운영진 부여'
   };
 
   container.innerHTML = `
-    <!-- 1. 이번 주 미션 운동 인증 카드 -->
+    <!-- 1. 주간 미션 운동 카드 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">🏋️ ${wm.weekLabel || '이번 주 미션 운동'}</div>
-          <div class="card-subtitle">${wm.deadlineDay || '일요일 밤 12시 마감'} · 미수행 시 패널티 1회(1만원)</div>
+          <div class="section-eyebrow">${wm.weekLabel || 'WEEKLY MISSION'}</div>
+          <div class="card-title">${wm.title || '주간 미션 운동'}</div>
+          <div class="card-subtitle">${wm.deadlineDay || '일요일 24:00 마감'} · 미이행 시 10,000원 패널티</div>
         </div>
-        <span class="badge ${myMissionDone ? 'badge-ok' : 'badge-warn'}">
-          ${myMissionDone ? '✅ 내 미션 완료' : '⏳ 미션 수행 전'}
+        <span class="tag ${myMissionDone ? 'tag-ok' : 'tag-neutral'}">
+          ${myMissionDone ? '인증 완료' : '미완료'}
         </span>
       </div>
 
-      <div style="background:#0b1120;border:1px solid var(--border-subtle);border-radius:12px;padding:13px;margin-bottom:12px;">
-        <div style="font-size:15px;font-weight:900;color:#fdba74;margin-bottom:4px;">🎯 ${wm.title || ''}</div>
-        <div style="font-size:12.5px;color:var(--text-sub);">${wm.description || ''}</div>
+      <div style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:13px 14px;margin-bottom:12px;font-size:13px;color:var(--text-secondary);">
+        ${wm.description || ''}
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" class="input-field" id="missionMemoInput" placeholder="운동 기록 입력 (예: 로잉 2,000m 7분 20초 완주!)" />
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <input type="text" class="input-field" id="missionMemoInput" placeholder="수행 기록 입력 (예: 로잉 2,000m 7분 20초 완료)" />
         <button type="button" class="btn btn-primary" id="btnSubmitMission" style="white-space:nowrap;">
-          ✅ 미션 인증
+          인증 등록
         </button>
       </div>
 
-      <div style="font-size:12.5px;font-weight:800;color:var(--text-sub);margin-bottom:8px;">
-        👏 이번 주 미션 완료자 (${currentWeekMissions.length} / ${AppState.db.participants.length}명)
+      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:8px;">
+        이번 주 완료 인원 (${currentWeekMissions.length} / ${AppState.db.participants.length}명)
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto;">
         ${
           currentWeekMissions.length === 0
-            ? `<div style="font-size:12.5px;color:var(--text-muted);">아직 이번 주 미션 인증자가 없습니다. 첫 번째로 인증해보세요!</div>`
+            ? `<div style="font-size:12.5px;color:var(--text-tertiary);">아직 등록된 미션 인증이 없습니다.</div>`
             : currentWeekMissions
                 .slice()
                 .reverse()
                 .map(m => {
                   const p = AppState.db.participants.find(u => u.id === m.userId);
                   return `
-                    <div style="display:flex;justify-content:space-between;align-items:center;background:#0b1120;padding:8px 11px;border-radius:8px;font-size:12.5px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-subtle);padding:9px 12px;border-radius:10px;font-size:12.5px;">
                       <div>
-                        <strong style="color:#6ee7b7;">${p ? `${p.team}조 ${p.name}` : '참가자'}</strong>
-                        <span style="color:var(--text-main);margin-left:6px;">${m.memo}</span>
+                        <strong style="color:var(--text-primary);">${p ? `${p.team}조 ${p.name}` : '참가자'}</strong>
+                        <span style="color:var(--text-secondary);margin-left:8px;">${m.memo}</span>
                       </div>
-                      <span style="color:var(--text-muted);font-size:11px;">${m.date.slice(5)}</span>
+                      <span style="color:var(--text-tertiary);font-size:11.5px;">${m.date.slice(5).replace('-', '.')}</span>
                     </div>
                   `;
                 })
@@ -1192,24 +1214,24 @@ function renderPenaltyTab(container) {
       </div>
     </section>
 
-    <!-- 2. 패널티 규칙 & 내 벌금 게이지 (1만원 / 최대 10회) -->
-    <section class="card">
-      <div class="card-header">
+    <!-- 2. 패널티 및 벌금 트래커 (히어로 다크 카드 + 리스트) -->
+    <section class="card-hero">
+      <div class="card-header" style="margin-bottom:14px;">
         <div>
-          <div class="card-title">💰 패널티 & 벌금 트래커 (최대 ${maxCount}회 한도)</div>
-          <div class="card-subtitle">패널티 1회당 ${formatWon(unitAmount)} · 개인 최대 ${maxCount}회(${formatWon(
+          <div class="section-eyebrow">PENALTY TRACKER</div>
+          <div class="card-title">패널티 및 벌금 현황</div>
+          <div class="card-subtitle">1회당 ${formatWon(unitAmount)} · 개인 최대 ${maxCount}회(${formatWon(
     maxCount * unitAmount
-  )})</div>
+  )}) 상한</div>
         </div>
-        <span class="badge badge-accent">총 모인 벌금: ${formatWon(totalFinePool)}</span>
+        <span class="tag tag-volt">누적 벌금 풀 ${formatWon(totalFinePool)}</span>
       </div>
 
-      <!-- 내 패널티 10칸 게이지 -->
-      <div style="background:#0b1120;border:1px solid var(--border-subtle);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="background:var(--bg-carbon-sub);border-radius:14px;padding:15px;">
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span style="font-size:13.5px;font-weight:800;">👤 ${user.team}조 ${user.name}님의 패널티 현황</span>
-          <strong style="font-size:15px;color:${myStat.cappedCount >= 5 ? '#fca5a5' : '#fdba74'};">
-            ${myStat.cappedCount} / ${maxCount}회 (${formatWon(myStat.fineAmount)})
+          <span style="font-size:13.5px;font-weight:700;color:#E5E7EB;">${user.team}조 ${user.name} (내 현황)</span>
+          <strong style="font-size:15px;color:${myStat.cappedCount >= 5 ? '#FF6B57' : '#C8F904'};">
+            ${myStat.cappedCount} / ${maxCount}회 · ${formatWon(myStat.fineAmount)}
           </strong>
         </div>
         <div class="penalty-slots">
@@ -1224,46 +1246,52 @@ function renderPenaltyTab(container) {
         </div>
       </div>
 
-      <!-- 4대 패널티 규칙 요약 -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;margin-bottom:14px;">
-        <div style="background:rgba(15,23,42,0.7);padding:9px 10px;border-radius:8px;border:1px solid var(--border-subtle);">
-          <strong style="color:#fca5a5;">① 하루 목표 블록 초과</strong>
-          <div style="color:var(--text-sub);margin-top:2px;">정해진 블록보다 더 먹을 경우 +1만원</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;margin-top:12px;">
+        <div style="background:var(--bg-carbon-sub);padding:10px 12px;border-radius:11px;">
+          <div style="color:#FFFFFF;font-weight:700;">01. 일일 블록 초과</div>
+          <div style="color:#8B95A1;margin-top:2px;">개인 목표 블록 초과 시 +1만원</div>
         </div>
-        <div style="background:rgba(15,23,42,0.7);padding:9px 10px;border-radius:8px;border:1px solid var(--border-subtle);">
-          <strong style="color:#fca5a5;">② 단톡방 12시 전 미보고</strong>
-          <div style="color:var(--text-sub);margin-top:2px;">조 단톡방 식단·비율 지각/누락 +1만원</div>
+        <div style="background:var(--bg-carbon-sub);padding:10px 12px;border-radius:11px;">
+          <div style="color:#FFFFFF;font-weight:700;">02. 단톡방 자정 미보고</div>
+          <div style="color:#8B95A1;margin-top:2px;">24:00 전 조 단톡 미보고 +1만원</div>
         </div>
-        <div style="background:rgba(15,23,42,0.7);padding:9px 10px;border-radius:8px;border:1px solid var(--border-subtle);">
-          <strong style="color:#fca5a5;">③ 네이버카페 12시 전 미작성</strong>
-          <div style="color:var(--text-sub);margin-top:2px;">카페 식단글 밤 12시 전 미업로드 +1만원</div>
+        <div style="background:var(--bg-carbon-sub);padding:10px 12px;border-radius:11px;">
+          <div style="color:#FFFFFF;font-weight:700;">03. 카페 자정 미작성</div>
+          <div style="color:#8B95A1;margin-top:2px;">24:00 전 카페 글 미업로드 +1만원</div>
         </div>
-        <div style="background:rgba(15,23,42,0.7);padding:9px 10px;border-radius:8px;border:1px solid var(--border-subtle);">
-          <strong style="color:#fca5a5;">④ 주간 미션 운동 미수행</strong>
-          <div style="color:var(--text-sub);margin-top:2px;">일주일 미션 운동 미인증 시 +1만원</div>
+        <div style="background:var(--bg-carbon-sub);padding:10px 12px;border-radius:11px;">
+          <div style="color:#FFFFFF;font-weight:700;">04. 주간 미션 미수행</div>
+          <div style="color:#8B95A1;margin-top:2px;">주간 운동 미션 미인증 +1만원</div>
         </div>
       </div>
+    </section>
 
-      <!-- 참가자별 패널티 현황 리스트 -->
-      <div style="font-size:13px;font-weight:800;margin-bottom:8px;">📋 참가자별 누적 패널티 & 벌금 현황</div>
-      <div style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;">
+    <!-- 참가자별 벌금 랭킹 -->
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <div class="section-eyebrow">MEMBER STATUS</div>
+          <div class="card-title">개인별 누적 패널티</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;max-height:290px;overflow-y:auto;">
         ${participantPenaltyStats
           .slice()
           .sort((a, b) => b.cappedCount - a.cappedCount || a.participant.team - b.participant.team)
           .map(
             s => `
-            <div style="background:#0b1120;border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;">
+            <div style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:11px 13px;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:13.5px;font-weight:800;">
+                <span style="font-size:13.5px;font-weight:700;">
                   ${s.participant.team}조 ${s.participant.name}
                   ${
                     s.cappedCount >= maxCount
-                      ? `<span class="badge badge-danger" style="margin-left:6px;">MAX 10회 도달</span>`
+                      ? `<span class="tag tag-danger" style="margin-left:6px;padding:2px 7px;font-size:10.5px;">MAX 도달</span>`
                       : ''
                   }
                 </span>
                 <span style="font-size:13px;font-weight:800;color:${
-                  s.cappedCount > 0 ? '#fca5a5' : '#6ee7b7'
+                  s.cappedCount > 0 ? 'var(--signal)' : 'var(--text-secondary)'
                 };">
                   ${s.cappedCount} / ${maxCount}회 · ${formatWon(s.fineAmount)}
                 </span>
@@ -1285,34 +1313,39 @@ function renderPenaltyTab(container) {
       </div>
     </section>
 
-    <!-- 3. 최근 패널티 상세 부과 내역 -->
+    <!-- 상세 패널티 부과 내역 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">📜 전체 패널티 상세 기록 (${AppState.db.penalties.length}건)</div>
-          <div class="card-subtitle">언제 어떤 사유로 패널티가 부여되었는지 투명하게 공개됩니다</div>
+          <div class="section-eyebrow">PENALTY LOGS</div>
+          <div class="card-title">상세 부과 내역 (${AppState.db.penalties.length})</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         ${
           AppState.db.penalties.length === 0
-            ? `<div style="text-align:center;padding:18px;color:var(--text-sub);font-size:13px;">부여된 패널티가 없습니다!</div>`
+            ? `<div style="text-align:center;padding:20px;color:var(--text-tertiary);font-size:13px;">부과된 패널티 내역이 없습니다.</div>`
             : AppState.db.penalties
                 .slice()
                 .reverse()
                 .map(p => {
                   const member = AppState.db.participants.find(u => u.id === p.userId);
                   return `
-                    <div style="background:#0b1120;border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <div style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:11px 13px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
                       <div>
-                        <div style="font-size:13px;font-weight:800;">
-                          <span style="color:#fdba74;">${member ? `${member.team}조 ${member.name}` : '참가자'}</span>
-                          &nbsp;·&nbsp;
-                          <span>${penaltyTypeLabels[p.type] || '패널티'}</span>
+                        <div style="font-size:13px;font-weight:700;">
+                          <span>${member ? `${member.team}조 ${member.name}` : '참가자'}</span>
+                          <span style="color:var(--text-tertiary);margin:0 5px;">·</span>
+                          <span style="color:var(--signal);">${penaltyTypeLabels[p.type] || '패널티'}</span>
                         </div>
-                        <div style="font-size:12px;color:var(--text-sub);margin-top:2px;">${p.date} | ${p.reason}</div>
+                        <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">${p.date.replace(
+                          /-/g,
+                          '.'
+                        )} · ${p.reason}</div>
                       </div>
-                      <strong style="color:#fca5a5;font-size:13px;white-space:nowrap;">+${formatWon(p.amount)}</strong>
+                      <strong style="color:var(--text-primary);font-size:13px;white-space:nowrap;">+${formatWon(
+                        p.amount
+                      )}</strong>
                     </div>
                   `;
                 })
@@ -1324,20 +1357,20 @@ function renderPenaltyTab(container) {
 
   document.getElementById('btnSubmitMission')?.addEventListener('click', async () => {
     const memoEl = document.getElementById('missionMemoInput');
-    const memo = memoEl?.value.trim() || `${wm.title || '주간 미션 운동'} 완료 인증!`;
+    const memo = memoEl?.value.trim() || `${wm.title || '주간 미션 운동'} 완료`;
     await apiRequest('/api/missions', 'POST', {
       userId: user.id,
       weekLabel: wm.weekLabel,
       date: AppState.selectedDate,
       memo
     });
-    showToast('🏋️ 이번 주 미션 운동 완료가 인증되었습니다!');
+    showToast('주간 미션 완료가 등록되었습니다');
     await loadState();
   });
 }
 
 // ============================================================================
-// TAB 5: 코치 · 운영진 관리 페이지 (조 편성 / 목표 블록 / 자동 패널티 스캔)
+// TAB 5: 코치 관리
 // ============================================================================
 function renderAdminTab(container) {
   const settings = AppState.db.settings || {};
@@ -1345,16 +1378,18 @@ function renderAdminTab(container) {
 
   if (!AppState.adminUnlocked) {
     container.innerHTML = `
-      <section class="card" style="text-align:center;padding:28px 18px;">
-        <div style="font-size:36px;margin-bottom:8px;">🔐</div>
-        <h3 style="font-size:18px;font-weight:900;margin-bottom:6px;">코치 / 운영진 관리자 모드</h3>
-        <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px;">
-          20명 조 편성(1~5조), 개인별 하루 목표 블록 설정, 주간 미션 등록,<br/>밤 12시 마감 미인증자 자동 패널티 정산을 관리합니다.
-        </p>
-        <div style="max-width:260px;margin:0 auto 12px;">
-          <input type="password" class="input-field" id="adminPinInput" placeholder="관리자 PIN 4자리 (기본: 0000)" style="text-align:center;font-size:16px;letter-spacing:4px;" value="0000" />
+      <section class="card" style="text-align:center;padding:36px 20px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:var(--bg-muted);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--text-primary);">
+          ${Icons.lock}
         </div>
-        <button type="button" class="btn btn-primary" id="btnUnlockAdmin">관리자 페이지 열기</button>
+        <h3 style="font-size:18px;font-weight:800;margin-bottom:6px;">코치 및 운영진 관리</h3>
+        <p style="font-size:13px;color:var(--text-tertiary);margin-bottom:20px;">
+          조 편성(1~5조), 개인별 목표 블록 설정, 주간 미션 등록 및<br/>자정 마감 미인증자 일괄 패널티 정산을 관리합니다.
+        </p>
+        <div style="max-width:240px;margin:0 auto 12px;">
+          <input type="password" class="input-field" id="adminPinInput" placeholder="PIN 4자리 (기본 0000)" style="text-align:center;font-size:16px;letter-spacing:4px;font-weight:700;" value="0000" />
+        </div>
+        <button type="button" class="btn btn-primary" id="btnUnlockAdmin">관리자 잠금 해제</button>
       </section>
     `;
     document.getElementById('btnUnlockAdmin')?.addEventListener('click', () => {
@@ -1362,10 +1397,10 @@ function renderAdminTab(container) {
       if (val === adminPin) {
         AppState.adminUnlocked = true;
         sessionStorage.setItem('leben_admin_unlocked', 'true');
-        showToast('🔓 코치 관리자 모드가 활성화되었습니다.');
+        showToast('관리자 모드가 활성화되었습니다');
         renderMain();
       } else {
-        showToast('❌ 관리자 PIN 번호가 일치하지 않습니다. (기본값: 0000)');
+        showToast('PIN 번호가 일치하지 않습니다 (기본값 0000)');
       }
     });
     return;
@@ -1376,22 +1411,26 @@ function renderAdminTab(container) {
   const shareUrl = lanIps.length > 0 ? `http://${lanIps[0]}:${port}` : window.location.origin;
 
   container.innerHTML = `
-    <!-- 1. 밤 12시 마감 위반자 자동 스캔 & 일괄 패널티 부여 -->
+    <!-- 1. 일일 마감 위반자 자동 스캔 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">⚡ 일일 마감 위반자 자동 스캔 & 패널티 정산</div>
-          <div class="card-subtitle">${AppState.selectedDate} 기준 블록 초과·단톡 미보고·카페 미작성자를 자동 추출합니다</div>
+          <div class="section-eyebrow">AUTO SETTLEMENT</div>
+          <div class="card-title">일일 마감 위반자 자동 스캔</div>
+          <div class="card-subtitle">${AppState.selectedDate.replace(
+            /-/g,
+            '.'
+          )} 기준 블록 초과·단톡 미보고·카페 미작성 인원을 추출합니다</div>
         </div>
       </div>
 
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
         <button type="button" class="btn btn-primary" id="btnScanViolations">
-          🔍 ${AppState.selectedDate} 위반자 자동 스캔하기
+          ${AppState.selectedDate} 위반 내역 스캔
         </button>
-        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-sub);cursor:pointer;">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;">
           <input type="checkbox" id="chkScanWeeklyMission" />
-          일요일 주간 미션 미수행자도 함께 포함
+          주간 미션 미수행자 포함
         </label>
       </div>
 
@@ -1399,19 +1438,19 @@ function renderAdminTab(container) {
         ${
           AppState.scannedViolations
             ? renderScannedViolationsHtml(AppState.scannedViolations)
-            : `<div style="font-size:12.5px;color:var(--text-sub);background:#0b1120;padding:12px;border-radius:10px;">
-                위 버튼을 누르면 20명 전원의 오늘 목표 블록 초과 여부, 단톡방 보고 여부, 네이버 카페 업로드 여부를 1초 만에 검사합니다.
+            : `<div style="font-size:12.5px;color:var(--text-tertiary);background:var(--bg-subtle);padding:13px;border-radius:11px;">
+                스캔 버튼을 누르면 20명 전원의 목표 블록 초과 여부와 단톡·카페 인증 상태를 검사합니다.
               </div>`
         }
       </div>
     </section>
 
-    <!-- 2. 수동 패널티 추가 및 취소 관리 -->
+    <!-- 2. 수동 패널티 추가 및 삭제 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">➕ 수동 패널티 부여 / 기존 패널티 취소</div>
-          <div class="card-subtitle">특정 참가자에게 패널티(1만원)를 추가하거나 잘못 부과된 내역을 삭제합니다</div>
+          <div class="section-eyebrow">MANUAL PENALTY</div>
+          <div class="card-title">패널티 수동 부과 및 취소</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -1421,19 +1460,19 @@ function renderAdminTab(container) {
             .join('')}
         </select>
         <select class="input-field" id="manualPenaltyType">
-          <option value="OVER_BLOCK">하루 목표 블록 초과</option>
-          <option value="NO_CAFE">밤 12시 전 카페 미작성</option>
-          <option value="NO_KAKAO">밤 12시 전 단톡 미보고</option>
+          <option value="OVER_BLOCK">일일 목표 블록 초과</option>
+          <option value="NO_CAFE">자정 전 카페 미작성</option>
+          <option value="NO_KAKAO">자정 전 단톡 미보고</option>
           <option value="NO_MISSION">주간 미션 운동 미수행</option>
           <option value="MANUAL">기타 규칙 위반</option>
         </select>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" class="input-field" id="manualPenaltyReason" placeholder="사유 입력 (예: 10/27 밤 12시 이후 지각 업로드)" />
-        <button type="button" class="btn btn-primary" id="btnAddManualPenalty" style="white-space:nowrap;">+ 1만원 부과</button>
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" class="input-field" id="manualPenaltyReason" placeholder="사유 입력 (예: 00:15 지각 업로드)" />
+        <button type="button" class="btn btn-primary" id="btnAddManualPenalty" style="white-space:nowrap;">부과</button>
       </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--text-sub);margin-bottom:6px;">최근 부과된 패널티 내역 (삭제 가능)</div>
+      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:6px;">최근 부과 내역 (취소 가능)</div>
       <div style="display:flex;flex-direction:column;gap:6px;max-height:180px;overflow-y:auto;">
         ${AppState.db.penalties
           .slice()
@@ -1441,9 +1480,9 @@ function renderAdminTab(container) {
           .map(p => {
             const m = AppState.db.participants.find(u => u.id === p.userId);
             return `
-              <div style="display:flex;justify-content:space-between;align-items:center;background:#0b1120;padding:7px 10px;border-radius:8px;font-size:12px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-subtle);padding:8px 11px;border-radius:9px;font-size:12px;">
                 <span><strong>${m ? `${m.team}조 ${m.name}` : ''}</strong> · ${p.date} · ${p.reason}</span>
-                <button type="button" class="btn btn-danger btn-sm" data-del-penalty="${p.id}" style="padding:3px 8px;font-size:11px;">삭제</button>
+                <button type="button" class="btn btn-danger btn-sm" data-del-penalty="${p.id}" style="padding:4px 8px;font-size:11px;">취소</button>
               </div>
             `;
           })
@@ -1451,47 +1490,47 @@ function renderAdminTab(container) {
       </div>
     </section>
 
-    <!-- 3. 주간 미션 운동 & 카페 주소 설정 -->
+    <!-- 3. 주간 미션 및 카페 설정 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">🏋️ 주간 미션 운동 & 챌린지 기본 설정</div>
-          <div class="card-subtitle">이번 주 미션 운동과 네이버 크로스핏 카페 링크를 설정합니다</div>
+          <div class="section-eyebrow">CHALLENGE CONFIG</div>
+          <div class="card-title">주간 미션 및 링크 설정</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div>
-          <label style="font-size:12px;color:var(--text-sub);font-weight:700;">챌린지 이름</label>
+          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">챌린지 타이틀</label>
           <input type="text" class="input-field" id="cfgChallengeName" value="${settings.challengeName || ''}" />
         </div>
         <div>
-          <label style="font-size:12px;color:var(--text-sub);font-weight:700;">네이버 크로스핏 카페 URL</label>
+          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">네이버 카페 주소</label>
           <input type="text" class="input-field" id="cfgCafeUrl" value="${settings.cafeUrl || ''}" />
         </div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
           <div>
-            <label style="font-size:12px;color:var(--text-sub);font-weight:700;">주차 표시</label>
+            <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">주차 표기</label>
             <input type="text" class="input-field" id="cfgWeekLabel" value="${settings.weeklyMission?.weekLabel || ''}" />
           </div>
           <div>
-            <label style="font-size:12px;color:var(--text-sub);font-weight:700;">주간 미션 운동 제목</label>
+            <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">미션 제목</label>
             <input type="text" class="input-field" id="cfgMissionTitle" value="${settings.weeklyMission?.title || ''}" />
           </div>
         </div>
         <div>
-          <label style="font-size:12px;color:var(--text-sub);font-weight:700;">주간 미션 상세 안내</label>
+          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">미션 상세 설명</label>
           <input type="text" class="input-field" id="cfgMissionDesc" value="${settings.weeklyMission?.description || ''}" />
         </div>
-        <button type="button" class="btn btn-primary btn-block" id="btnSaveSettings">💾 챌린지 & 주간 미션 설정 저장</button>
+        <button type="button" class="btn btn-primary btn-block" id="btnSaveSettings">설정 저장</button>
       </div>
     </section>
 
-    <!-- 4. 참가자 20명 & 5개 조 명단/목표블록 관리 -->
+    <!-- 4. 참가자 20명 조 편성 및 목표 블록 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">👥 참가자 명단 · 조 편성(1~5조) · 일일 목표 블록 설정</div>
-          <div class="card-subtitle">참가자 이름, 소속 조, 하루 정해진 블록 수, 개인 PIN(4자리)을 수정할 수 있습니다</div>
+          <div class="section-eyebrow">PARTICIPANTS</div>
+          <div class="card-title">참가자 명단 및 목표 블록 (${AppState.db.participants.length}명)</div>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="btnAddParticipant">+ 인원 추가</button>
       </div>
@@ -1505,7 +1544,7 @@ function renderAdminTab(container) {
               <th>역할</th>
               <th>목표블록</th>
               <th>PIN</th>
-              <th>관리</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="adminParticipantTbody">
@@ -1513,7 +1552,7 @@ function renderAdminTab(container) {
               .map(
                 (p, idx) => `
               <tr data-p-id="${p.id}">
-                <td style="width:68px;">
+                <td style="width:66px;">
                   <select class="p-team">
                     ${[1, 2, 3, 4, 5]
                       .map(t => `<option value="${t}" ${Number(p.team) === t ? 'selected' : ''}>${t}조</option>`)
@@ -1521,16 +1560,16 @@ function renderAdminTab(container) {
                   </select>
                 </td>
                 <td><input type="text" class="p-name" value="${p.name}" /></td>
-                <td style="width:72px;">
+                <td style="width:70px;">
                   <select class="p-role">
                     <option value="조장" ${p.role === '조장' ? 'selected' : ''}>조장</option>
                     <option value="조원" ${p.role !== '조장' ? 'selected' : ''}>조원</option>
                   </select>
                 </td>
-                <td style="width:74px;"><input type="number" class="p-blocks" value="${p.targetBlocks}" min="5" max="25" step="1" /></td>
-                <td style="width:74px;"><input type="text" class="p-pin" value="${p.pin || '1234'}" maxlength="4" /></td>
-                <td style="width:52px;">
-                  <button type="button" class="btn btn-danger btn-sm" data-remove-idx="${idx}" style="padding:4px 7px;">삭제</button>
+                <td style="width:70px;"><input type="number" class="p-blocks" value="${p.targetBlocks}" min="5" max="25" step="1" /></td>
+                <td style="width:72px;"><input type="text" class="p-pin" value="${p.pin || '1234'}" maxlength="4" /></td>
+                <td style="width:50px;">
+                  <button type="button" class="btn btn-danger btn-sm" data-remove-idx="${idx}" style="padding:5px 8px;">삭제</button>
                 </td>
               </tr>
             `
@@ -1539,30 +1578,30 @@ function renderAdminTab(container) {
           </tbody>
         </table>
       </div>
-      <div style="margin-top:12px;">
-        <button type="button" class="btn btn-success btn-block" id="btnSaveParticipants">
-          💾 참가자 명단 및 목표 블록 일괄 저장
+      <div style="margin-top:14px;">
+        <button type="button" class="btn btn-primary btn-block" id="btnSaveParticipants">
+          참가자 명단 일괄 저장
         </button>
       </div>
     </section>
 
-    <!-- 5. 카톡방 링크 공유 & 데이터 초기화 -->
+    <!-- 5. 접속 주소 및 데이터 초기화 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">📱 단톡방 공유 안내 & 데이터 초기화</div>
-          <div class="card-subtitle">같은 와이파이에서는 아래 주소로 스마트폰 접속이 가능하며, 외부 배포 시 어디서나 접속됩니다</div>
+          <div class="section-eyebrow">SYSTEM & DATA</div>
+          <div class="card-title">접속 링크 및 데이터 관리</div>
         </div>
       </div>
-      <div style="background:#0b1120;padding:12px;border-radius:10px;font-size:13px;margin-bottom:12px;">
-        <div>🔗 <strong>현재 접속 링크:</strong> <span style="color:#fdba74;">${shareUrl}</span></div>
-        <div style="color:var(--text-sub);font-size:12px;margin-top:4px;">
-          스마트폰 브라우저(크롬/사파리)에서 접속 후 <strong>[홈 화면에 추가]</strong>를 누르면 일반 앱처럼 아이콘이 생성됩니다.
+      <div style="background:var(--bg-subtle);padding:13px;border-radius:12px;font-size:13px;margin-bottom:12px;">
+        <div><strong>모바일 접속 주소 :</strong> <span style="color:var(--text-primary);font-weight:700;">${shareUrl}</span></div>
+        <div style="color:var(--text-tertiary);font-size:12px;margin-top:4px;">
+          스마트폰 브라우저에서 접속 후 '홈 화면에 추가'를 선택하면 앱 아이콘으로 설치됩니다.
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button type="button" class="btn btn-danger" id="btnClearAllLogs">🧹 기록만 비우기 (새 챌린지 시작)</button>
-        <button type="button" class="btn btn-secondary" id="btnResetDemo">🔄 샘플 데모 데이터 복원</button>
+        <button type="button" class="btn btn-danger" id="btnClearAllLogs">기록 초기화 (새 기수 시작)</button>
+        <button type="button" class="btn btn-secondary" id="btnResetDemo">샘플 데이터 복원</button>
       </div>
     </section>
   `;
@@ -1572,36 +1611,35 @@ function renderAdminTab(container) {
 
 function renderScannedViolationsHtml(violations) {
   if (violations.length === 0) {
-    return `<div style="padding:14px;background:var(--success-soft);border:1px solid var(--success);border-radius:10px;color:#6ee7b7;font-size:13px;font-weight:700;">
-      🎉 선택한 날짜(${AppState.selectedDate})에 새로 부과할 규칙 위반자가 없습니다!
+    return `<div style="padding:14px;background:var(--emerald-soft);border-radius:11px;color:var(--emerald-text);font-size:13px;font-weight:700;">
+      선택한 날짜(${AppState.selectedDate})에 감지된 규칙 위반 내역이 없습니다.
     </div>`;
   }
   return `
-    <div style="background:#0b1120;border:1px solid var(--border-subtle);border-radius:12px;padding:12px;">
-      <div style="font-size:13px;font-weight:800;color:#fca5a5;margin-bottom:8px;">
-        🚨 총 ${violations.length}건의 규칙 위반(미인증/블록초과)이 감지되었습니다
+    <div style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:13px;">
+      <div style="font-size:13px;font-weight:800;color:var(--signal);margin-bottom:8px;">
+        총 ${violations.length}건의 미인증·블록초과 항목이 감지되었습니다
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:12px;">
         ${violations
           .map(
             (v, idx) => `
-          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;background:var(--bg-card);padding:8px 10px;border-radius:8px;cursor:pointer;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;background:var(--bg-surface);border:1px solid var(--border-hairline);padding:9px 11px;border-radius:9px;cursor:pointer;">
             <input type="checkbox" class="chk-violation-item" data-v-idx="${idx}" checked />
-            <span><strong>${v.team}조 ${v.userName}</strong> — ${v.reason} <span style="color:#fca5a5;">(+10,000원)</span></span>
+            <span><strong>${v.team}조 ${v.userName}</strong> · ${v.reason} <span style="color:var(--signal);font-weight:700;">(+10,000원)</span></span>
           </label>
         `
           )
           .join('')}
       </div>
       <button type="button" class="btn btn-primary btn-block" id="btnApplyScannedPenalties">
-        ⚡ 선택된 항목 일괄 패널티(건당 1만원) 부여하기
+        선택 항목 일괄 패널티 부과
       </button>
     </div>
   `;
 }
 
 function bindAdminEvents() {
-  // 위반자 자동 스캔
   document.getElementById('btnScanViolations')?.addEventListener('click', () => {
     const date = AppState.selectedDate;
     const includeMission = document.getElementById('chkScanWeeklyMission')?.checked;
@@ -1610,13 +1648,12 @@ function bindAdminEvents() {
 
     AppState.db.participants.forEach(p => {
       const existingCount = getUserPenalties(p.id).length;
-      if (existingCount >= maxCount) return; // 최대 10번 한도 도달자 제외
+      if (existingCount >= maxCount) return;
 
       const log = getUserDailyLog(p.id, date);
       const meals = log.meals || [];
       const totals = window.ZoneShareHelper.computeTotals(meals);
 
-      // 1) 하루 목표 블록 초과 검사
       if (
         totals.carb > p.targetBlocks ||
         totals.protein > p.targetBlocks ||
@@ -1628,13 +1665,12 @@ function bindAdminEvents() {
           team: p.team,
           date,
           type: 'OVER_BLOCK',
-          reason: `일일 목표 블록(${p.targetBlocks}) 초과 섭취 (탄${formatBlock(totals.carb)}·단${formatBlock(
+          reason: `목표 블록(${p.targetBlocks}B) 초과 섭취 (탄${formatBlock(totals.carb)}·단${formatBlock(
             totals.protein
           )}·지${formatBlock(totals.fat)})`
         });
       }
 
-      // 2) 밤 12시 전 단톡방 미보고 검사
       if (!log.kakaoReported) {
         violations.push({
           userId: p.id,
@@ -1642,11 +1678,10 @@ function bindAdminEvents() {
           team: p.team,
           date,
           type: 'NO_KAKAO',
-          reason: `밤 12시 전 ${p.team}조 단톡방 식단·비율 미보고`
+          reason: `자정 전 ${p.team}조 단톡방 식단 미보고`
         });
       }
 
-      // 3) 밤 12시 전 네이버 카페 미작성 검사
       if (!log.cafePosted) {
         violations.push({
           userId: p.id,
@@ -1654,11 +1689,10 @@ function bindAdminEvents() {
           team: p.team,
           date,
           type: 'NO_CAFE',
-          reason: `밤 12시 전 네이버 카페 식단 게시글 미작성`
+          reason: `자정 전 네이버 카페 식단글 미작성`
         });
       }
 
-      // 4) 주간 미션 미수행 검사 (체크 시)
       if (includeMission && !isUserWeeklyMissionDone(p.id)) {
         violations.push({
           userId: p.id,
@@ -1675,7 +1709,6 @@ function bindAdminEvents() {
     renderMain();
   });
 
-  // 스캔된 위반자 일괄 부과
   document.getElementById('btnApplyScannedPenalties')?.addEventListener('click', async () => {
     const checks = document.querySelectorAll('.chk-violation-item:checked');
     const selected = [];
@@ -1686,7 +1719,7 @@ function bindAdminEvents() {
       }
     });
     if (selected.length === 0) {
-      showToast('선택된 패널티 항목이 없습니다.');
+      showToast('선택된 항목이 없습니다');
       return;
     }
     await apiRequest('/api/penalties', 'POST', {
@@ -1694,21 +1727,20 @@ function bindAdminEvents() {
       penalties: selected
     });
     AppState.scannedViolations = null;
-    showToast(`⚡ ${selected.length}건의 패널티가 일괄 반영되었습니다!`);
+    showToast(`${selected.length}건의 패널티가 반영되었습니다`);
     await loadState();
   });
 
-  // 수동 패널티 추가
   document.getElementById('btnAddManualPenalty')?.addEventListener('click', async () => {
     const userId = document.getElementById('manualPenaltyUser')?.value;
     const type = document.getElementById('manualPenaltyType')?.value;
     const reasonInput = document.getElementById('manualPenaltyReason')?.value.trim();
     const defaultReasons = {
-      OVER_BLOCK: '하루 목표 블록 초과 섭취',
-      NO_CAFE: '밤 12시 전 네이버 카페 미작성',
-      NO_KAKAO: '밤 12시 전 조별 단톡방 미보고',
+      OVER_BLOCK: '일일 목표 블록 초과 섭취',
+      NO_CAFE: '자정 전 네이버 카페 미작성',
+      NO_KAKAO: '자정 전 조별 단톡방 미보고',
       NO_MISSION: '주간 미션 운동 미수행',
-      MANUAL: '챌린지 규칙 미준수'
+      MANUAL: '챌린지 규칙 위반'
     };
     await apiRequest('/api/penalties', 'POST', {
       penalty: {
@@ -1718,23 +1750,21 @@ function bindAdminEvents() {
         reason: reasonInput || defaultReasons[type]
       }
     });
-    showToast('➕ 패널티 1회(1만원)가 부여되었습니다.');
+    showToast('패널티 1회(10,000원)가 부과되었습니다');
     await loadState();
   });
 
-  // 패널티 삭제
   document.querySelectorAll('[data-del-penalty]').forEach(btn => {
     btn.addEventListener('click', async () => {
       await apiRequest('/api/penalties', 'POST', {
         action: 'delete',
         penaltyId: btn.dataset.delPenalty
       });
-      showToast('🗑️ 해당 패널티 내역이 삭제(취소)되었습니다.');
+      showToast('패널티 내역이 취소되었습니다');
       await loadState();
     });
   });
 
-  // 설정 저장
   document.getElementById('btnSaveSettings')?.addEventListener('click', async () => {
     const challengeName = document.getElementById('cfgChallengeName')?.value.trim();
     const cafeUrl = document.getElementById('cfgCafeUrl')?.value.trim();
@@ -1754,40 +1784,37 @@ function bindAdminEvents() {
         }
       }
     });
-    showToast('💾 챌린지 및 주간 미션 설정이 저장되었습니다!');
+    showToast('설정이 저장되었습니다');
     await loadState();
   });
 
-  // 참가자 추가
   document.getElementById('btnAddParticipant')?.addEventListener('click', async () => {
     const list = [...AppState.db.participants];
     const nextNum = list.length + 1;
     const team = ((nextNum - 1) % 5) + 1;
     list.push({
       id: `u_${Date.now()}`,
-      name: `새참가자${nextNum}`,
+      name: `참가자${nextNum}`,
       team,
       role: '조원',
       targetBlocks: 11,
       pin: '1234'
     });
     await apiRequest('/api/admin/update', 'POST', { participants: list });
-    showToast('👤 새 참가자가 추가되었습니다.');
+    showToast('새 참가자가 추가되었습니다');
     await loadState();
   });
 
-  // 참가자 삭제
   document.querySelectorAll('[data-remove-idx]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const idx = Number(btn.dataset.removeIdx);
       const list = AppState.db.participants.filter((_, i) => i !== idx);
       await apiRequest('/api/admin/update', 'POST', { participants: list });
-      showToast('참가자가 명단에서 삭제되었습니다.');
+      showToast('참가자가 삭제되었습니다');
       await loadState();
     });
   });
 
-  // 참가자 명단 일괄 저장
   document.getElementById('btnSaveParticipants')?.addEventListener('click', async () => {
     const rows = document.querySelectorAll('#adminParticipantTbody tr');
     const updated = [];
@@ -1801,26 +1828,25 @@ function bindAdminEvents() {
       updated.push({ id, name, team, role, targetBlocks, pin });
     });
     await apiRequest('/api/admin/update', 'POST', { participants: updated });
-    showToast('💾 참가자 조 편성 및 목표 블록이 모두 저장되었습니다!');
+    showToast('참가자 명단이 저장되었습니다');
     await loadState();
   });
 
-  // 기록 비우기 / 데모 복원
   document.getElementById('btnClearAllLogs')?.addEventListener('click', async () => {
     await apiRequest('/api/admin/update', 'POST', { action: 'clear_logs' });
-    showToast('🧹 식단·미션·패널티 기록이 초기화되었습니다! (명단은 유지됨)');
+    showToast('전체 기록이 초기화되었습니다');
     await loadState();
   });
 
   document.getElementById('btnResetDemo')?.addEventListener('click', async () => {
     await apiRequest('/api/admin/update', 'POST', { action: 'reset_demo' });
-    showToast('🔄 샘플 데모 데이터가 복원되었습니다!');
+    showToast('샘플 데이터가 복원되었습니다');
     await loadState();
   });
 }
 
 // ============================================================================
-// 참가자 전환 & 4자리 PIN 모달
+// 참가자 전환 모달
 // ============================================================================
 function openUserSwitchModal(preselectUserId = null) {
   const modal = document.getElementById('userModal');
@@ -1832,30 +1858,31 @@ function openUserSwitchModal(preselectUserId = null) {
   function renderModalInner() {
     const chosenUser = AppState.db.participants.find(p => p.id === chosenId) || AppState.db.participants[0];
     content.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;">
         <div>
-          <h3 style="font-size:17px;font-weight:900;">👤 내 이름 선택 & 간편 접속</h3>
-          <div style="font-size:12px;color:var(--text-sub);">소속 조와 이름을 선택하고 4자리 PIN(초기값 1234)을 입력하세요</div>
+          <div class="section-eyebrow">SWITCH MEMBER</div>
+          <h3 style="font-size:18px;font-weight:800;">참가자 선택</h3>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">이름을 선택하고 4자리 PIN(초기값 1234)을 입력하세요</div>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="btnCloseUserModal">닫기</button>
       </div>
 
-      <div style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+      <div style="max-height:270px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;margin-bottom:16px;padding-right:2px;">
         ${[1, 2, 3, 4, 5]
           .map(teamNum => {
             const members = AppState.db.participants.filter(p => Number(p.team) === teamNum);
             return `
               <div>
-                <div style="font-size:12px;font-weight:800;color:#fdba74;margin-bottom:5px;">🚩 ${teamNum}조</div>
+                <div style="font-size:11.5px;font-weight:800;color:var(--text-tertiary);margin-bottom:6px;">${teamNum}조</div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
                   ${members
                     .map(
                       m => `
                     <button type="button" class="btn ${
-                      m.id === chosenId ? 'btn-primary' : 'btn-secondary'
-                    } btn-sm" data-pick-uid="${m.id}" style="justify-content:space-between;">
+                      m.id === chosenId ? 'btn-primary' : 'btn-outline'
+                    } btn-sm" data-pick-uid="${m.id}" style="justify-content:space-between;padding:9px 12px;">
                       <span>${m.name}</span>
-                      <small style="opacity:0.8;">${m.targetBlocks}블록</small>
+                      <small style="opacity:0.7;">${m.targetBlocks}B</small>
                     </button>
                   `
                     )
@@ -1867,16 +1894,16 @@ function openUserSwitchModal(preselectUserId = null) {
           .join('')}
       </div>
 
-      <div style="background:#0b1120;padding:12px;border-radius:12px;border:1px solid var(--border-subtle);">
-        <div style="font-size:13px;font-weight:800;margin-bottom:6px;">
-          🔐 <strong>${chosenUser.team}조 ${chosenUser.name}</strong>님의 4자리 PIN 번호
+      <div style="background:var(--bg-subtle);padding:14px;border-radius:14px;border:1px solid var(--border-hairline);">
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:8px;color:var(--text-secondary);">
+          <strong>${chosenUser.team}조 ${chosenUser.name}</strong> PIN 번호
         </div>
         <div style="display:flex;gap:8px;">
           <input type="password" class="input-field" id="pinVerifyInput" maxlength="4" value="${
             chosenUser.pin || '1234'
-          }" placeholder="4자리 숫자 (기본 1234)" style="letter-spacing:4px;text-align:center;font-weight:800;" />
+          }" placeholder="4자리 PIN" style="letter-spacing:4px;text-align:center;font-weight:800;background:var(--bg-surface);" />
           <button type="button" class="btn btn-primary" id="btnConfirmUserSwitch" style="white-space:nowrap;">
-            접속하기
+            전환하기
           </button>
         </div>
       </div>
@@ -1896,13 +1923,13 @@ function openUserSwitchModal(preselectUserId = null) {
     content.querySelector('#btnConfirmUserSwitch')?.addEventListener('click', () => {
       const enteredPin = content.querySelector('#pinVerifyInput')?.value.trim();
       if (enteredPin !== (chosenUser.pin || '1234')) {
-        showToast('❌ PIN 번호가 일치하지 않습니다.');
+        showToast('PIN 번호가 일치하지 않습니다');
         return;
       }
       AppState.currentUserId = chosenUser.id;
       localStorage.setItem('leben_user_id', chosenUser.id);
       modal.style.display = 'none';
-      showToast(`👋 반갑습니다! ${chosenUser.team}조 ${chosenUser.name}님으로 접속되었습니다.`);
+      showToast(`${chosenUser.team}조 ${chosenUser.name}님으로 전환되었습니다`);
       renderHeader();
       renderMain();
     });
@@ -1913,15 +1940,13 @@ function openUserSwitchModal(preselectUserId = null) {
 }
 
 // ============================================================================
-// 초기화 및 글로벌 이벤트 연결
+// 초기화
 // ============================================================================
 window.addEventListener('DOMContentLoaded', async () => {
-  // PWA Service Worker 등록
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 
-  // 탭 전환
   document.querySelectorAll('.nav-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       AppState.activeTab = btn.dataset.tab;
@@ -1930,12 +1955,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 참가자 전환 모달
   document.getElementById('btnSwitchUser')?.addEventListener('click', () => {
     openUserSwitchModal();
   });
 
-  // 날짜 이동
   const picker = document.getElementById('datePicker');
   picker?.addEventListener('change', e => {
     if (e.target.value) {
