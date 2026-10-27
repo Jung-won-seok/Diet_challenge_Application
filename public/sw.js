@@ -1,4 +1,4 @@
-const CACHE_NAME = 'leben-zonda-v2';
+const CACHE_NAME = 'leben-zonda-v4';
 const ASSETS = [
   '/',
   '/index.html',
