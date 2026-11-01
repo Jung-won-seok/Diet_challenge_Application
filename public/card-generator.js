@@ -1,4 +1,4 @@
-// 네이버 카페 실제 이미지 붙여넣기(image/png ClipboardItem) 및 조별 4인 종합 보고 생성기
+// 네이버 카페 실제 이미지 붙여넣기(image/png ClipboardItem) 및 끼니별(아침·점심·저녁) 구분 카드/포맷 생성기
 
 function roundRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
@@ -18,9 +18,19 @@ function loadImage(src) {
   return new Promise(resolve => {
     if (!src) return resolve(null);
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
+    // iOS Safari WebKit에서 data: URL에 crossOrigin='anonymous' 설정 시 로드 지연/보안 예외 방지
+    if (!src.startsWith('data:') && !src.startsWith('blob:')) {
+      img.crossOrigin = 'anonymous';
+    }
+    const timer = setTimeout(() => resolve(null), 4000);
+    img.onload = () => {
+      clearTimeout(timer);
+      resolve(img);
+    };
+    img.onerror = () => {
+      clearTimeout(timer);
+      resolve(null);
+    };
     img.src = src;
   });
 }
@@ -29,6 +39,13 @@ function formatBlockNum(n) {
   const num = Number(n || 0);
   return Number.isInteger(num) ? String(num) : num.toFixed(1).replace(/\.0$/, '');
 }
+
+const MEAL_META = {
+  아침: { icon: '☀️', badgeBg: '#0EA5E9', label: '아침 식단' },
+  점심: { icon: '🌤️', badgeBg: '#10B981', label: '점심 식단' },
+  저녁: { icon: '🌙', badgeBg: '#6366F1', label: '저녁 식단' },
+  간식: { icon: '🍎', badgeBg: '#F59E0B', label: '간식 식단' }
+};
 
 window.ZoneShareHelper = {
   getMealPhotos(meal) {
@@ -90,6 +107,130 @@ window.ZoneShareHelper = {
     return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
   },
 
+  // 임의의 이미지(SVG/JPEG/PNG DataURL)를 네이버 카페 업로드용 경량 image/jpeg 또는 image/png base64 DataURL로 변환
+  async dataUrlToPngDataUrl(src) {
+    if (!src) return null;
+    if (src.startsWith('data:image/jpeg;base64,') || src.startsWith('data:image/png;base64,')) {
+      return src;
+    }
+    try {
+      const img = await loadImage(src);
+      const canvas = document.createElement('canvas');
+      canvas.width = img ? img.width || 600 : 600;
+      canvas.height = img ? img.height || 450 : 450;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (img) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+      return canvas.toDataURL('image/jpeg', 0.88);
+    } catch (_) {
+      return null;
+    }
+  },
+
+  // 끼니별(아침 -> 점심 -> 저녁 -> 간식)로 사진과 바로 밑 끼니별 블럭 텍스트를 구조화하여 반환
+  async buildCafeMealSections({ user, date, meals, missionDone }) {
+    const totals = this.computeTotals(meals);
+    const target = Number(user.targetBlocks || 11);
+    const isOver = totals.carb > target || totals.protein > target || totals.fat > target;
+    const ratioStr = this.computeRatioText(totals);
+
+    const order = ['아침', '점심', '저녁', '간식'];
+    const sortedMeals = [...meals].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+
+    const sections = [];
+    for (const m of sortedMeals) {
+      const meta = MEAL_META[m.type] || { icon: '🍽️', label: `${m.type} 식단` };
+      const rawPhotos = this.getMealPhotos(m);
+      const convertedPhotos = [];
+      for (const src of rawPhotos) {
+        const dataUrl = await this.dataUrlToPngDataUrl(src);
+        if (dataUrl) convertedPhotos.push(dataUrl);
+      }
+      const blockLines = [
+        `▶ ${m.type} 블럭 : 탄 ${formatBlockNum(m.carb)}블럭 · 단 ${formatBlockNum(m.protein)}블럭 · 지 ${formatBlockNum(m.fat)}블럭`
+      ];
+      if (m.memo) {
+        blockLines.push(`▶ ${m.type} 메뉴 : ${m.memo}`);
+      }
+      sections.push({
+        type: m.type,
+        headerText: `${meta.icon} [${meta.label}]`,
+        blockText: blockLines.join('\n'),
+        carb: Number(m.carb || 0),
+        protein: Number(m.protein || 0),
+        fat: Number(m.fat || 0),
+        memo: m.memo || '',
+        images: convertedPhotos
+      });
+    }
+
+    const footerSummaryText = [
+      `━━━━━━━━━━━━━━━━━━━━`,
+      `📊 [오늘 하루 총 섭취 탄·단·지 블럭 합계]`,
+      `• 탄수화물 : 총 ${formatBlockNum(totals.carb)}블럭 (일일 목표 ${target}블럭)`,
+      `• 단백질   : 총 ${formatBlockNum(totals.protein)}블럭 (일일 목표 ${target}블럭)`,
+      `• 지방     : 총 ${formatBlockNum(totals.fat)}블럭 (일일 목표 ${target}블럭)`,
+      `• 탄:단:지 비율 : ${ratioStr} (${isOver ? '목표 블럭 초과' : '목표 블럭 내 완료'})`,
+      `• 주간 미션 운동 : ${missionDone ? '이번 주 미션 완료' : '진행 중'}`
+    ].join('\n');
+
+    return { sections, footerSummaryText };
+  },
+
+  // 네이버 카페 글쓰기 API(content 파라미터)에 들어갈 끼니별(아침·점심·저녁) 구분 HTML 본문 생성
+  buildCafeArticleHtml({ user, date, meals, missionDone }) {
+    const totals = this.computeTotals(meals);
+    const target = Number(user.targetBlocks || 11);
+    const isOver = totals.carb > target || totals.protein > target || totals.fat > target;
+    const ratioStr = this.computeRatioText(totals);
+
+    const order = ['아침', '점심', '저녁', '간식'];
+    const sortedMeals = [...meals].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
+
+    const mealSectionsHtml =
+      sortedMeals.length > 0
+        ? sortedMeals
+            .map(m => {
+              const meta = MEAL_META[m.type] || { icon: '🍽️', label: `${m.type} 식단`, badgeBg: '#0EA5E9' };
+              return `
+                <div style="margin-bottom:18px;padding:14px 16px;border:1px solid #E2E8F0;border-radius:14px;background:#F8FAFC;">
+                  <div style="font-size:16px;font-weight:800;color:#0F172A;margin-bottom:6px;">
+                    ${meta.icon} [${meta.label}]
+                  </div>
+                  <div style="font-size:14.5px;font-weight:800;color:#0369A1;margin-bottom:4px;">
+                    ▶ ${m.type} 블럭 : 탄 ${formatBlockNum(m.carb)}블럭 · 단 ${formatBlockNum(m.protein)}블럭 · 지 ${formatBlockNum(m.fat)}블럭
+                  </div>
+                  ${
+                    m.memo
+                      ? `<div style="font-size:13.5px;color:#475569;">▶ ${m.type} 메뉴 : ${m.memo}</div>`
+                      : ''
+                  }
+                </div>
+              `;
+            })
+            .join('')
+        : `<p style="color:#64748B;">등록된 끼니 내역 없음</p>`;
+
+    return [
+      `<div style="font-family:'Pretendard',-apple-system,sans-serif;line-height:1.65;color:#0F172A;">`,
+      `<h3 style="margin:0 0 8px 0;">[${user.team}조 ${user.name}] ${date} 일일 식단 및 끼니별 블럭 인증</h3>`,
+      `<p style="margin:0 0 16px 0;color:#475569;">소속 : <b>${user.team}조 (${user.name})</b> &nbsp;|&nbsp; 일일 목표 : <b>각 ${target}블럭</b></p>`,
+      mealSectionsHtml,
+      `<div style="margin-top:20px;padding:16px;border-radius:14px;background:#0F172A;color:#FFFFFF;">`,
+      `<h4 style="margin:0 0 8px 0;color:#C8F904;">📊 오늘 하루 총 섭취 탄·단·지 블럭 합계</h4>`,
+      `<p style="margin:4px 0;">• <b>탄수화물 (C)</b> : 총 ${formatBlockNum(totals.carb)}블럭 (목표 ${target}블럭)</p>`,
+      `<p style="margin:4px 0;">• <b>단백질 (P)</b> : 총 ${formatBlockNum(totals.protein)}블럭 (목표 ${target}블럭)</p>`,
+      `<p style="margin:4px 0;">• <b>지방 (F)</b> : 총 ${formatBlockNum(totals.fat)}블럭 (목표 ${target}블럭)</p>`,
+      `<p style="margin:4px 0;">• <b>탄 : 단 : 지 비율</b> : ${ratioStr} (<b>${isOver ? '목표 블럭 초과' : '목표 블럭 내 완료'}</b>)</p>`,
+      `<p style="margin:4px 0;">• <b>주간 미션 운동</b> : ${missionDone ? '이번 주 미션 완료' : '진행 중'}</p>`,
+      `</div>`,
+      `</div>`
+    ].join('');
+  },
+
   // 네이버 카페 게시글 제목
   buildCafeTitle({ user, date, meals }) {
     const totals = this.computeTotals(meals);
@@ -97,10 +238,10 @@ window.ZoneShareHelper = {
     const shortDate = date.slice(5).replace('-', '/');
     return `[존다챌린지/${user.team}조/${user.name}] ${shortDate} 식단 인증 (탄${formatBlockNum(
       totals.carb
-    )}·단${formatBlockNum(totals.protein)}·지${formatBlockNum(totals.fat)} / 목표 ${target}블록)`;
+    )}·단${formatBlockNum(totals.protein)}·지${formatBlockNum(totals.fat)} / 목표 ${target}블럭)`;
   },
 
-  // 사진 밑에 붙여넣을 탄단지 블록 요약 텍스트
+  // 아침·점심·저녁을 명확히 구별하고 각 끼니 밑에 끼니별 블럭을 표시하는 텍스트 포맷
   buildCafeBottomBlockText({ user, date, meals, missionDone }) {
     const totals = this.computeTotals(meals);
     const target = Number(user.targetBlocks || 11);
@@ -110,29 +251,33 @@ window.ZoneShareHelper = {
     const order = ['아침', '점심', '저녁', '간식'];
     const sortedMeals = [...meals].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
 
-    const mealLines =
+    const mealSectionsText =
       sortedMeals.length > 0
         ? sortedMeals
-            .map(
-              m =>
-                `• ${m.type} : 탄 ${formatBlockNum(m.carb)} / 단 ${formatBlockNum(m.protein)} / 지 ${formatBlockNum(
-                  m.fat
-                )} 블록${m.memo ? ` (${m.memo})` : ''}`
-            )
-            .join('\n')
-        : '• 기록된 식단 없음';
+            .map(m => {
+              const meta = MEAL_META[m.type] || { icon: '🍽️', label: `${m.type} 식단` };
+              const lines = [
+                `${meta.icon} [${meta.label}]`,
+                `▶ ${m.type} 블럭 : 탄 ${formatBlockNum(m.carb)}블럭 · 단 ${formatBlockNum(m.protein)}블럭 · 지 ${formatBlockNum(m.fat)}블럭`
+              ];
+              if (m.memo) {
+                lines.push(`▶ ${m.type} 메뉴 : ${m.memo}`);
+              }
+              return lines.join('\n');
+            })
+            .join('\n\n')
+        : '• 등록된 아침·점심·저녁 식단이 없습니다.';
 
     return [
-      `[${user.team}조 ${user.name} · ${date} 식단 및 탄단지 블록 보고]`,
-      ``,
-      `■ 끼니별 섭취 내역`,
-      mealLines,
-      ``,
-      `■ 오늘 하루 총 섭취 탄·단·지 블록 수`,
-      `• 탄수화물 : ${formatBlockNum(totals.carb)} 블록 (목표 ${target}블록)`,
-      `• 단백질   : ${formatBlockNum(totals.protein)} 블록 (목표 ${target}블록)`,
-      `• 지방     : ${formatBlockNum(totals.fat)} 블록 (목표 ${target}블록)`,
-      `• 탄:단:지 비율 : ${ratioStr} (${isOver ? '목표 블록 초과' : '목표 블록 내 완료'})`,
+      `[${user.team}조 ${user.name} · ${date} 끼니별 식단 및 탄단지 블럭 인증]`,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      mealSectionsText,
+      `━━━━━━━━━━━━━━━━━━━━`,
+      `📊 [오늘 하루 총 섭취 탄·단·지 블럭 합계]`,
+      `• 탄수화물 : 총 ${formatBlockNum(totals.carb)}블럭 (목표 ${target}블럭)`,
+      `• 단백질   : 총 ${formatBlockNum(totals.protein)}블럭 (목표 ${target}블럭)`,
+      `• 지방     : 총 ${formatBlockNum(totals.fat)}블럭 (목표 ${target}블럭)`,
+      `• 탄:단:지 비율 : ${ratioStr} (${isOver ? '목표 블럭 초과' : '목표 블럭 내 완료'})`,
       `• 주간 미션 운동 : ${missionDone ? '이번 주 미션 완료' : '진행 중'}`
     ].join('\n');
   },
@@ -153,7 +298,7 @@ window.ZoneShareHelper = {
       }
       return `• ${member.name} (목표 ${member.targetBlocks}B) : 탄 ${formatBlockNum(
         totals.carb
-      )} · 단 ${formatBlockNum(totals.protein)} · 지 ${formatBlockNum(totals.fat)} 블록 [사진 ${photoCount}장 / ${
+      )} · 단 ${formatBlockNum(totals.protein)} · 지 ${formatBlockNum(totals.fat)} 블럭 [사진 ${photoCount}장 / ${
         isOver ? '초과' : '완료'
       }]`;
     });
@@ -168,28 +313,35 @@ window.ZoneShareHelper = {
     ].join('\n');
   },
 
-  // [아침·점심·저녁 사진만 모은 화이트 콜라주 캔버스] -> 사진만 Ctrl+V로 붙여넣고 밑에 텍스트를 따로 칠 때 사용
+  // [아침·점심·저녁 끼니별 구별 사진 + 각 사진 밑 끼니별 블럭 표시 캔버스]
   async renderPhotosOnlyCanvas(canvas, { user, date, meals }) {
     const order = ['아침', '점심', '저녁', '간식'];
     const sortedMeals = [...meals].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-    const photoItems = [];
-    sortedMeals.forEach(m => {
-      const photos = this.getMealPhotos(m);
-      photos.forEach((src, i) => {
-        photoItems.push({ meal: m, src, subIdx: i + 1, totalInMeal: photos.length });
-      });
-    });
 
-    const itemCount = photoItems.length;
-    const cols = itemCount === 1 ? 1 : 2;
-    const rows = Math.max(1, Math.ceil(Math.max(itemCount, 1) / cols));
     const cardWidth = 920;
-    const pad = 28;
-    const gap = 20;
-    const colW = cols === 1 ? cardWidth - pad * 2 : (cardWidth - pad * 2 - gap) / 2;
-    const imgH = cols === 1 ? 420 : 310;
-    const cellH = imgH + 54;
-    const cardHeight = pad * 2 + rows * cellH + (rows - 1) * gap;
+    const pad = 32;
+    const sectionGap = 24;
+
+    if (sortedMeals.length === 0) {
+      canvas.width = cardWidth;
+      canvas.height = 260;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, cardWidth, 260);
+      roundRect(ctx, pad, pad, cardWidth - pad * 2, 196, 18);
+      ctx.fillStyle = '#F4F5F7';
+      ctx.fill();
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '700 22px "Pretendard", -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('등록된 아침·점심·저녁 식단 사진이 없습니다.', cardWidth / 2, 136);
+      ctx.textAlign = 'left';
+      return;
+    }
+
+    // 각 끼니(아침/점심/저녁) 섹션 높이 계산: 헤더(52) + 사진영역(320) + 하단 끼니별 블럭바(84) = 456
+    const sectionH = 456;
+    const cardHeight = pad * 2 + sortedMeals.length * sectionH + (sortedMeals.length - 1) * sectionGap;
 
     canvas.width = cardWidth;
     canvas.height = cardHeight;
@@ -198,61 +350,84 @@ window.ZoneShareHelper = {
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, cardWidth, cardHeight);
 
-    if (itemCount === 0) {
-      roundRect(ctx, pad, pad, cardWidth - pad * 2, cardHeight - pad * 2, 16);
-      ctx.fillStyle = '#F4F5F7';
+    for (let sIdx = 0; sIdx < sortedMeals.length; sIdx++) {
+      const meal = sortedMeals[sIdx];
+      const meta = MEAL_META[meal.type] || { icon: '🍽️', badgeBg: '#0EA5E9', label: `${meal.type} 식단` };
+      const photos = this.getMealPhotos(meal);
+      const loadedImgs = await Promise.all(photos.slice(0, 3).map(src => loadImage(src)));
+
+      const sy = pad + sIdx * (sectionH + sectionGap);
+      const innerW = cardWidth - pad * 2;
+
+      // 끼니 섹션 카드 배경
+      roundRect(ctx, pad, sy, innerW, sectionH, 22);
+      ctx.fillStyle = '#F8FAFC';
       ctx.fill();
-      ctx.fillStyle = '#6B7280';
-      ctx.font = '700 22px "Pretendard", -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('등록된 아침·점심·저녁 식단 사진이 없습니다.', cardWidth / 2, cardHeight / 2);
-      ctx.textAlign = 'left';
-      return;
-    }
-
-    const images = await Promise.all(photoItems.map(item => loadImage(item.src)));
-
-    photoItems.forEach((item, idx) => {
-      const { meal, subIdx, totalInMeal } = item;
-      const col = idx % cols;
-      const row = Math.floor(idx / cols);
-      const x = pad + col * (colW + gap);
-      const y = pad + row * (cellH + gap);
-
-      roundRect(ctx, x, y, colW, cellH, 16);
-      ctx.fillStyle = '#F8F9FA';
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = '#E5E7EB';
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#E2E8F0';
       ctx.stroke();
 
-      ctx.save();
-      roundRect(ctx, x, y, colW, imgH, 16);
-      ctx.clip();
-      const img = images[idx];
-      if (img) {
-        const scale = Math.max(colW / img.width, imgH / img.height);
-        const sw = img.width * scale;
-        const sh = img.height * scale;
-        ctx.drawImage(img, x + (colW - sw) / 2, y + (imgH - sh) / 2, sw, sh);
-      }
-      ctx.restore();
+      // 1) 상단 끼니 구분 배지 (아침 / 점심 / 저녁)
+      roundRect(ctx, pad + 18, sy + 14, 138, 34, 17);
+      ctx.fillStyle = meta.badgeBg;
+      ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '800 16px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(`${meta.icon} ${meta.label}`, pad + 34, sy + 37);
 
-      const label = totalInMeal > 1 ? `[${meal.type} ${subIdx}]` : `[${meal.type}]`;
-      ctx.fillStyle = '#111315';
-      ctx.font = '800 18px "Pretendard", -apple-system, sans-serif';
+      if (meal.time) {
+        ctx.fillStyle = '#64748B';
+        ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
+        ctx.fillText(`기록 시간 ${meal.time}`, pad + 170, sy + 37);
+      }
+
+      // 2) 끼니 사진 영역 (1장~3장 자동 분할)
+      const imgAreaY = sy + 60;
+      const imgAreaH = 296;
+      const count = Math.max(1, loadedImgs.length);
+      const gap = 12;
+      const eachW = (innerW - 36 - (count - 1) * gap) / count;
+
+      for (let i = 0; i < count; i++) {
+        const ix = pad + 18 + i * (eachW + gap);
+        ctx.save();
+        roundRect(ctx, ix, imgAreaY, eachW, imgAreaH, 16);
+        ctx.clip();
+        const img = loadedImgs[i];
+        if (img) {
+          const scale = Math.max(eachW / img.width, imgAreaH / img.height);
+          const sw = img.width * scale;
+          const sh = img.height * scale;
+          ctx.drawImage(img, ix + (eachW - sw) / 2, imgAreaY + (imgAreaH - sh) / 2, sw, sh);
+        } else {
+          ctx.fillStyle = '#E2E8F0';
+          ctx.fillRect(ix, imgAreaY, eachW, imgAreaH);
+        }
+        ctx.restore();
+      }
+
+      // 3) 사진 바로 밑: 끼니별 탄·단·지 블럭 표시 바
+      const blockBarY = imgAreaY + imgAreaH + 12;
+      roundRect(ctx, pad + 18, blockBarY, innerW - 36, 74, 14);
+      ctx.fillStyle = '#0F172A';
+      ctx.fill();
+
+      ctx.fillStyle = '#C8F904';
+      ctx.font = '800 19px "Pretendard", -apple-system, sans-serif';
       ctx.fillText(
-        `${label} 탄 ${formatBlockNum(meal.carb)} · 단 ${formatBlockNum(meal.protein)} · 지 ${formatBlockNum(meal.fat)}블록  ${
-          meal.memo ? `(${meal.memo.slice(0, 16)})` : ''
-        }`,
-        x + 16,
-        y + imgH + 34
+        `▶ ${meal.type} 블럭 : 탄 ${formatBlockNum(meal.carb)}블럭  ·  단 ${formatBlockNum(meal.protein)}블럭  ·  지 ${formatBlockNum(meal.fat)}블럭`,
+        pad + 36,
+        blockBarY + 32
       );
-    });
+
+      ctx.fillStyle = '#CBD5E1';
+      ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
+      const memoStr = meal.memo ? `식단 내용 : ${meal.memo}` : `${meal.type} 식단 블럭 기록 완료`;
+      ctx.fillText(memoStr.length > 46 ? memoStr.slice(0, 46) + '…' : memoStr, pad + 36, blockBarY + 58);
+    }
   },
 
-  // [네이버 카페 본문 일체형 화이트 카드] -> 위에는 아침·점심·저녁 사진, 아래에는 탄단지 블록 수 텍스트가 흰 배경에 깔끔히 그려져
-  // 네이버 카페 글쓰기에서 Ctrl+V 한 번만 누르면 사진+글이 통째로 본문에 삽입됨!
+  // [네이버 카페 본문 일체형 화이트 카드] -> 아침 / 점심 / 저녁 섹션별로 사진과 바로 밑 끼니별 블럭을 구분 표시하고 맨 아래에 하루 총합 표시
   async renderSummaryCardCanvas(canvas, { user, date, meals, missionDone }) {
     const totals = this.computeTotals(meals);
     const target = Number(user.targetBlocks || 11);
@@ -261,168 +436,191 @@ window.ZoneShareHelper = {
 
     const order = ['아침', '점심', '저녁', '간식'];
     const sortedMeals = [...meals].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-    const photoItems = [];
-    sortedMeals.forEach(m => {
-      const photos = this.getMealPhotos(m);
-      if (photos.length === 0) {
-        photoItems.push({ meal: m, src: null, subIdx: 1, totalInMeal: 1 });
-      } else {
-        photos.forEach((src, i) => {
-          photoItems.push({ meal: m, src, subIdx: i + 1, totalInMeal: photos.length });
-        });
-      }
-    });
 
-    const itemCount = photoItems.length;
-    const rows = Math.max(1, Math.ceil(Math.max(itemCount, 1) / 2));
     const cardWidth = 920;
-    const photoRowHeight = 320;
-    const cardHeight = 140 + rows * photoRowHeight + 290;
+    const pad = 36;
+    const innerW = cardWidth - pad * 2;
+    const sectionH = 448;
+    const sectionGap = 20;
+    const headerH = 132;
+    const footerH = 256;
+
+    const mealBodyH =
+      sortedMeals.length === 0
+        ? 220
+        : sortedMeals.length * sectionH + (sortedMeals.length - 1) * sectionGap;
+
+    const cardHeight = headerH + mealBodyH + footerH + 40;
 
     canvas.width = cardWidth;
     canvas.height = cardHeight;
     const ctx = canvas.getContext('2d');
 
-    // 네이버 카페 본문과 자연스럽게 어우러지는 화이트 에디토리얼 배경
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, cardWidth, cardHeight);
 
     // 상단 타이틀 영역
-    ctx.fillStyle = '#111315';
-    ctx.font = '800 32px "Pretendard", -apple-system, sans-serif';
-    ctx.fillText(`[${user.team}조 ${user.name}] ${date} 일일 식단 및 블록 인증`, 40, 62);
+    ctx.fillStyle = '#0F172A';
+    ctx.font = '800 31px "Pretendard", -apple-system, sans-serif';
+    ctx.fillText(`[${user.team}조 ${user.name}] ${date} 아침·점심·저녁 식단 & 블럭 인증`, pad, 58);
 
-    ctx.fillStyle = '#6B7280';
+    ctx.fillStyle = '#64748B';
     ctx.font = '600 18px "Pretendard", -apple-system, sans-serif';
-    ctx.fillText(`일일 목표 : 탄 ${target} · 단 ${target} · 지 ${target} 블록  |  등록된 식단 사진 ${itemCount}장`, 40, 98);
+    ctx.fillText(
+      `일일 목표 : 탄 ${target} · 단 ${target} · 지 ${target} 블럭   |   등록된 끼니 : ${sortedMeals.map(m => m.type).join(' · ') || '없음'}`,
+      pad,
+      94
+    );
 
-    ctx.fillStyle = '#E5E7EB';
-    ctx.fillRect(40, 118, cardWidth - 80, 2);
+    ctx.fillStyle = '#E2E8F0';
+    ctx.fillRect(pad, 114, innerW, 2);
 
-    // 1. 위쪽: 아침, 점심, 저녁 식단 사진 그리드
-    const gridStartY = 140;
-    const colW = (cardWidth - 80 - 20) / 2;
-    const cellH = 296;
+    const startY = headerH;
 
-    if (itemCount === 0) {
-      roundRect(ctx, 40, gridStartY, cardWidth - 80, 240, 16);
-      ctx.fillStyle = '#F4F5F7';
+    if (sortedMeals.length === 0) {
+      roundRect(ctx, pad, startY, innerW, 196, 18);
+      ctx.fillStyle = '#F8FAFC';
       ctx.fill();
-      ctx.fillStyle = '#6B7280';
-      ctx.font = '600 22px "Pretendard", -apple-system, sans-serif';
+      ctx.fillStyle = '#64748B';
+      ctx.font = '600 21px "Pretendard", -apple-system, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('등록된 아침·점심·저녁 식단 사진이 없습니다.', cardWidth / 2, gridStartY + 125);
+      ctx.fillText('등록된 아침·점심·저녁 식단이 없습니다.', cardWidth / 2, startY + 106);
       ctx.textAlign = 'left';
     } else {
-      const images = await Promise.all(photoItems.map(item => loadImage(item.src)));
+      for (let sIdx = 0; sIdx < sortedMeals.length; sIdx++) {
+        const meal = sortedMeals[sIdx];
+        const meta = MEAL_META[meal.type] || { icon: '🍽️', badgeBg: '#0EA5E9', label: `${meal.type} 식단` };
+        const photos = this.getMealPhotos(meal);
+        const loadedImgs = await Promise.all(photos.slice(0, 3).map(src => loadImage(src)));
 
-      photoItems.forEach((item, idx) => {
-        const { meal, subIdx, totalInMeal } = item;
-        const col = idx % 2;
-        const row = Math.floor(idx / 2);
-        const x = 40 + col * (colW + 20);
-        const y = gridStartY + row * photoRowHeight;
+        const sy = startY + sIdx * (sectionH + sectionGap);
 
-        roundRect(ctx, x, y, colW, cellH, 16);
-        ctx.fillStyle = '#F8F9FA';
+        // 끼니 섹션 박스
+        roundRect(ctx, pad, sy, innerW, sectionH, 22);
+        ctx.fillStyle = '#F8FAFC';
         ctx.fill();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = '#E5E7EB';
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#E2E8F0';
         ctx.stroke();
 
-        ctx.save();
-        roundRect(ctx, x, y, colW, 212, 16);
-        ctx.clip();
-        const img = images[idx];
-        if (img) {
-          const scale = Math.max(colW / img.width, 212 / img.height);
-          const sw = img.width * scale;
-          const sh = img.height * scale;
-          ctx.drawImage(img, x + (colW - sw) / 2, y + (212 - sh) / 2, sw, sh);
-        } else {
-          ctx.fillStyle = '#E5E7EB';
-          ctx.fillRect(x, y, colW, 212);
-        }
-
-        const pillLabel = totalInMeal > 1 ? `${meal.type} 사진 ${subIdx}` : `${meal.type} 식단`;
-        roundRect(ctx, x + 14, y + 14, 110, 30, 15);
-        ctx.fillStyle = 'rgba(17, 19, 21, 0.82)';
+        // 1) 끼니 구분 헤더 배지 (☀️ 아침 식단 / 🌤️ 점심 식단 / 🌙 저녁 식단)
+        roundRect(ctx, pad + 18, sy + 14, 142, 34, 17);
+        ctx.fillStyle = meta.badgeBg;
         ctx.fill();
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = '700 14.5px "Pretendard", -apple-system, sans-serif';
-        ctx.fillText(pillLabel, x + 28, y + 34);
-        ctx.restore();
+        ctx.font = '800 16px "Pretendard", -apple-system, sans-serif';
+        ctx.fillText(`${meta.icon} ${meta.label}`, pad + 32, sy + 37);
 
-        ctx.fillStyle = '#111315';
+        ctx.fillStyle = '#0F172A';
+        ctx.font = '800 17px "Pretendard", -apple-system, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(
+          `${meal.type} 섭취량 : 탄 ${formatBlockNum(meal.carb)}B · 단 ${formatBlockNum(meal.protein)}B · 지 ${formatBlockNum(meal.fat)}B`,
+          pad + innerW - 20,
+          sy + 37
+        );
+        ctx.textAlign = 'left';
+
+        // 2) 끼니 사진 영역
+        const imgAreaY = sy + 58;
+        const imgAreaH = 290;
+        const count = Math.max(1, loadedImgs.length);
+        const gap = 12;
+        const eachW = (innerW - 36 - (count - 1) * gap) / count;
+
+        for (let i = 0; i < count; i++) {
+          const ix = pad + 18 + i * (eachW + gap);
+          ctx.save();
+          roundRect(ctx, ix, imgAreaY, eachW, imgAreaH, 16);
+          ctx.clip();
+          const img = loadedImgs[i];
+          if (img) {
+            const scale = Math.max(eachW / img.width, imgAreaH / img.height);
+            const sw = img.width * scale;
+            const sh = img.height * scale;
+            ctx.drawImage(img, ix + (eachW - sw) / 2, imgAreaY + (imgAreaH - sh) / 2, sw, sh);
+          } else {
+            ctx.fillStyle = '#E2E8F0';
+            ctx.fillRect(ix, imgAreaY, eachW, imgAreaH);
+          }
+          ctx.restore();
+        }
+
+        // 3) 사진 바로 밑: 끼니별 탄·단·지 블럭 표시 바
+        const blockBarY = imgAreaY + imgAreaH + 12;
+        roundRect(ctx, pad + 18, blockBarY, innerW - 36, 74, 14);
+        ctx.fillStyle = '#0F172A';
+        ctx.fill();
+
+        ctx.fillStyle = '#C8F904';
         ctx.font = '800 18.5px "Pretendard", -apple-system, sans-serif';
         ctx.fillText(
-          `[${meal.type}] 탄 ${formatBlockNum(meal.carb)} · 단 ${formatBlockNum(meal.protein)} · 지 ${formatBlockNum(meal.fat)} 블록`,
-          x + 18,
-          y + 246
+          `▶ [${meal.type} 블럭]  탄수화물 ${formatBlockNum(meal.carb)}블럭  ·  단백질 ${formatBlockNum(meal.protein)}블럭  ·  지방 ${formatBlockNum(meal.fat)}블럭`,
+          pad + 34,
+          blockBarY + 31
         );
 
-        ctx.fillStyle = '#4B5563';
-        ctx.font = '500 15.5px "Pretendard", -apple-system, sans-serif';
-        const memoText = meal.memo || `${meal.type} 식단 기록`;
-        const clippedMemo = memoText.length > 25 ? memoText.slice(0, 25) + '…' : memoText;
-        ctx.fillText(clippedMemo, x + 18, y + 274);
-      });
+        ctx.fillStyle = '#CBD5E1';
+        ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
+        const memoStr = meal.memo ? `식단 메모 : ${meal.memo}` : `${meal.type} 식단 및 블럭 인증 완료`;
+        ctx.fillText(memoStr.length > 48 ? memoStr.slice(0, 48) + '…' : memoStr, pad + 34, blockBarY + 57);
+      }
     }
 
-    // 2. 아래쪽: 오늘 하루 먹은 총 탄·단·지 블록 수 (사진 바로 아래에 배치)
-    const bottomY = gridStartY + rows * photoRowHeight + 10;
-    roundRect(ctx, 40, bottomY, cardWidth - 80, 240, 20);
-    ctx.fillStyle = '#111315';
+    // 하단: 오늘 하루 총 섭취 탄·단·지 블럭 합계
+    const bottomY = startY + mealBodyH + 20;
+    roundRect(ctx, pad, bottomY, innerW, 236, 22);
+    ctx.fillStyle = '#0F172A';
     ctx.fill();
 
     ctx.fillStyle = '#C8F904';
     ctx.font = '800 18px "Pretendard", -apple-system, sans-serif';
-    ctx.fillText('■ 오늘 하루 총 섭취 탄·단·지 블록 수', 68, bottomY + 42);
+    ctx.fillText('📊 오늘 하루 총 섭취 탄·단·지 블럭 합계 (아침+점심+저녁)', pad + 28, bottomY + 40);
 
     ctx.fillStyle = isOver ? '#FF6B57' : '#FFFFFF';
-    ctx.font = '700 16px "Pretendard", -apple-system, sans-serif';
+    ctx.font = '700 15.5px "Pretendard", -apple-system, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(
-      `탄:단:지 비율 ${ratioStr}  |  ${isOver ? '목표 블록 초과' : '목표 블록 준수 완료'}`,
-      cardWidth - 68,
-      bottomY + 42
+      `탄:단:지 비율 ${ratioStr}  |  ${isOver ? '목표 블럭 초과' : '목표 블럭 준수 완료'}`,
+      pad + innerW - 28,
+      bottomY + 40
     );
     ctx.textAlign = 'left';
 
     const macroBoxes = [
-      { label: '탄수화물 (CARB)', val: totals.carb, color: '#38BDF8' },
-      { label: '단백질 (PROTEIN)', val: totals.protein, color: '#C8F904' },
-      { label: '지방 (FAT)', val: totals.fat, color: '#FBBF24' }
+      { label: '총 탄수화물 (CARB)', val: totals.carb, color: '#38BDF8' },
+      { label: '총 단백질 (PROTEIN)', val: totals.protein, color: '#C8F904' },
+      { label: '총 지방 (FAT)', val: totals.fat, color: '#FBBF24' }
     ];
 
-    const boxW = (cardWidth - 136 - 32) / 3;
+    const boxW = (innerW - 56 - 32) / 3;
     macroBoxes.forEach((mb, i) => {
-      const bx = 68 + i * (boxW + 16);
-      const by = bottomY + 64;
-      roundRect(ctx, bx, by, boxW, 118, 14);
-      ctx.fillStyle = '#1C1F24';
+      const bx = pad + 28 + i * (boxW + 16);
+      const by = bottomY + 62;
+      roundRect(ctx, bx, by, boxW, 114, 14);
+      ctx.fillStyle = '#1E293B';
       ctx.fill();
 
-      ctx.fillStyle = '#9CA3AF';
-      ctx.font = '700 14px "Pretendard", -apple-system, sans-serif';
-      ctx.fillText(mb.label, bx + 18, by + 32);
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = '700 13.5px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(mb.label, bx + 18, by + 30);
 
       const overThis = mb.val > target;
       ctx.fillStyle = overThis ? '#FF6B57' : '#FFFFFF';
-      ctx.font = '800 32px "Pretendard", -apple-system, sans-serif';
-      ctx.fillText(`${formatBlockNum(mb.val)}블록`, bx + 18, by + 76);
+      ctx.font = '800 30px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(`${formatBlockNum(mb.val)}블럭`, bx + 18, by + 74);
 
-      ctx.fillStyle = '#6B7280';
-      ctx.font = '600 14px "Pretendard", -apple-system, sans-serif';
-      ctx.fillText(`목표 ${target}블록`, bx + 18, by + 102);
+      ctx.fillStyle = '#64748B';
+      ctx.font = '600 13.5px "Pretendard", -apple-system, sans-serif';
+      ctx.fillText(`일일 목표 ${target}블럭`, bx + 18, by + 98);
     });
 
-    ctx.fillStyle = '#9CA3AF';
-    ctx.font = '600 15px "Pretendard", -apple-system, sans-serif';
+    ctx.fillStyle = '#94A3B8';
+    ctx.font = '600 14.5px "Pretendard", -apple-system, sans-serif';
     ctx.fillText(
       `주간 미션 운동 : ${missionDone ? '이번 주 미션 완료' : '진행 중'}   |   CROSSFIT LEBEN ZONE CHALLENGE`,
-      68,
-      bottomY + 214
+      pad + 28,
+      bottomY + 208
     );
   },
 
@@ -447,7 +645,7 @@ window.ZoneShareHelper = {
 
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '800 38px "Pretendard", -apple-system, sans-serif';
-    ctx.fillText(`${teamNum}조 일일 식단 & 블록 취합 보고 (${date.replace(/-/g, '.')})`, 48, 104);
+    ctx.fillText(`${teamNum}조 일일 식단 & 블럭 취합 보고 (${date.replace(/-/g, '.')})`, 48, 104);
 
     for (let i = 0; i < membersData.length; i++) {
       const { member, meals } = membersData[i];
@@ -468,14 +666,14 @@ window.ZoneShareHelper = {
 
       ctx.fillStyle = '#9CA3AF';
       ctx.font = '600 16px "Pretendard", -apple-system, sans-serif';
-      ctx.fillText(`목표 ${member.targetBlocks}블록`, 164, y + 43);
+      ctx.fillText(`목표 ${member.targetBlocks}블럭`, 164, y + 43);
 
       ctx.fillStyle = isOver ? '#FF6B57' : '#C8F904';
       ctx.font = '800 22px "Pretendard", -apple-system, sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(
         meals.length > 0
-          ? `총 섭취 : 탄 ${formatBlockNum(totals.carb)} · 단 ${formatBlockNum(totals.protein)} · 지 ${formatBlockNum(totals.fat)} 블록`
+          ? `총 섭취 : 탄 ${formatBlockNum(totals.carb)} · 단 ${formatBlockNum(totals.protein)} · 지 ${formatBlockNum(totals.fat)} 블럭`
           : '오늘 식단 미등록',
         cardWidth - 74,
         y + 44
