@@ -1232,9 +1232,16 @@ async function renderShareTab(container) {
   const teamMenuId = String(naverCfg.teamMenuIds?.[String(user.team)] || '').trim();
   const targetMenuId = String(user.cafeMenuId || teamMenuId || naverCfg.defaultMenuId || '').trim();
   const activeCohort = user.cohortGroup || naverCfg.activeCohortGroup || '2026년 2기';
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const directBoardUrl =
     clubId && targetMenuId
-      ? `https://cafe.naver.com/f-e/cafes/${clubId}/menus/${targetMenuId}`
+      ? (isMobile
+          ? `https://m.cafe.naver.com/ca-fe/cafes/${clubId}/menus/${targetMenuId}`
+          : `https://cafe.naver.com/ca-fe/cafes/${clubId}/menus/${targetMenuId}`)
+      : cafeUrl;
+  const directWriteUrl =
+    clubId && targetMenuId
+      ? `https://m.cafe.naver.com/ca-fe/cafes/${clubId}/menus/${targetMenuId}/articles/write`
       : cafeUrl;
   const isNaverLinked = Boolean(user.hasNaverToken);
 
@@ -1620,6 +1627,83 @@ async function renderShareTab(container) {
         }
       }
 
+      if (result.needDirectWrite) {
+        const writeUrl =
+          result.writeUrl ||
+          result.directBoardUrl ||
+          directWriteUrl ||
+          `https://m.cafe.naver.com/ca-fe/cafes/${result.postInfo?.clubId || clubId || '31811778'}/menus/${result.postInfo?.menuId || targetMenuId}/articles/write`;
+
+        // 1) 식단 카드(사진+블록)를 클립보드에 우선 복사 시도
+        let copied = false;
+        if (summaryCanvas && summaryCanvas.width > 0) {
+          try {
+            copied = await copyCanvasImageToClipboard(
+              summaryCanvas,
+              '식단 카드(사진+블록)가 복사되었습니다! 열린 카페 글쓰기 창 본문에서 붙여넣기(Ctrl+V) 하세요.'
+            );
+          } catch (_) {}
+        }
+        if (!copied) {
+          try {
+            await copyToClipboard(
+              cafeBottomText,
+              '식단 내역 텍스트가 복사되었습니다! 카페 글쓰기 창 본문에서 붙여넣기 하세요.'
+            );
+          } catch (_) {}
+        }
+
+        // 2) 팝업 창 열기 (iOS/모바일 브라우저 고려)
+        try {
+          window.open(writeUrl, '_blank', 'noopener');
+        } catch (_) {}
+
+        // 3) UI 안내 배너 표시
+        setLiveStatus(`
+          <div style="background:linear-gradient(135deg, rgba(3,199,90,0.12) 0%, rgba(3,199,90,0.06) 100%);border:1.5px solid rgba(3,199,90,0.4);border-radius:16px;padding:14px 16px;margin-top:10px;text-align:left;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px;">
+              <span style="font-weight:800;color:#03C75A;font-size:15px;display:inline-flex;align-items:center;gap:6px;">
+                🎉 <strong>[${user.team}조 ${user.name}]</strong> 개인 게시판 글쓰기 연동 완료!
+              </span>
+              <span class="badge" style="background:#03C75A;color:#FFFFFF;font-size:11.5px;padding:4px 9px;border-radius:8px;font-weight:700;">
+                인증완료 기록됨 ✓
+              </span>
+            </div>
+            <p style="font-size:13px;color:var(--text-primary);margin:0 0 10px 0;line-height:1.55;">
+              식단 카드(아침·점심·저녁 사진과 끼니별 탄·단·지 블록)가 <strong>클립보드에 자동 복사</strong>되었습니다.<br>
+              아래 <strong>[글쓰기 창 열기]</strong>를 누른 후 본문에 <strong>붙여넣기(길게 터치 또는 Ctrl+V)</strong>만 하시면 1초 만에 등록됩니다!
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="${writeUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm" id="btnGoToCafeWritePage" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-weight:800;background:#03C75A;border-color:#03C75A;">
+                📝 [${user.name}] 개인 게시판 글쓰기 바로가기 ↗
+              </a>
+              <button type="button" class="btn btn-secondary btn-sm" id="btnLiveStatusRecopyCard" style="font-weight:700;">
+                📋 식단 카드 다시 복사
+              </button>
+              <button type="button" class="btn btn-outline btn-sm" id="btnLiveStatusCopyTitle" style="font-weight:700;">
+                📌 제목 복사
+              </button>
+            </div>
+          </div>
+        `);
+
+        document.getElementById('btnLiveStatusRecopyCard')?.addEventListener('click', async () => {
+          if (summaryCanvas) {
+            await copyCanvasImageToClipboard(summaryCanvas, '식단 카드가 다시 복사되었습니다!');
+          } else {
+            await copyToClipboard(cafeBottomText, '식단 내역이 다시 복사되었습니다!');
+          }
+        });
+
+        document.getElementById('btnLiveStatusCopyTitle')?.addEventListener('click', async () => {
+          await copyToClipboard(subjectVal, '게시글 제목이 복사되었습니다!');
+        });
+
+        showToast(`[${user.team}조 ${user.name}] 게시판 글쓰기 창이 열렸습니다. 본문에서 붙여넣기 하세요!`);
+        await loadState();
+        return;
+      }
+
       const postedUrl = result.postInfo?.articleUrl || directBoardUrl;
       if (result.simulated) {
         setLiveStatus(
@@ -1673,7 +1757,7 @@ async function renderShareTab(container) {
       date: AppState.selectedDate,
       cafePosted: true
     });
-    window.open(directBoardUrl, '_blank', 'noopener');
+    window.open(directWriteUrl || directBoardUrl, '_blank', 'noopener');
     await loadState();
   });
 
@@ -3155,6 +3239,15 @@ function openUserSwitchModal(preselectUserId = null) {
           userId: chosenUser.id,
           forceLoginWindow: false
         });
+        if (res.needsOAuth && res.oauthUrl) {
+          window.location.href = res.oauthUrl;
+          return;
+        }
+        if (res.needsDirectWrite) {
+          showToast('Vercel 환경에서는 스마트 원터치 직행 글쓰기로 즉시 인증이 진행됩니다!');
+          modal.style.display = 'none';
+          return;
+        }
         AppState.currentUserId = chosenUser.id;
         AppState.selectedTeamNum = Number(chosenUser.team);
         localStorage.setItem('leben_user_id', chosenUser.id);

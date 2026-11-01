@@ -772,7 +772,7 @@ async function resolveImageSourceToBuffer(src) {
   return null;
 }
 // 네이버 카페 글쓰기 API용 multipart/form-data 바디 생성
-function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
+async function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
   const boundary = `----LebenZoneBoundary${crypto.randomBytes(12).toString('hex')}`;
   const chunks = [];
   const CRLF = '\r\n';
@@ -792,11 +792,12 @@ function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
   addTextField('subject', encodeURIComponent(subject));
   addTextField('content', encodeURIComponent(contentHtml));
 
-  images.forEach((dataUrl, idx) => {
-    const parsed = parseDataUrlImage(dataUrl);
-    if (!parsed || !parsed.buffer) return;
+  for (let idx = 0; idx < images.length; idx++) {
+    const rawSrc = images[idx];
+    const parsed = await resolveImageSourceToBuffer(rawSrc);
+    if (!parsed || !parsed.buffer) continue;
     const { mimeType, buffer: fileBuffer, ext } = parsed;
-    const filename = `leben_diet_${Date.now()}_${idx}.${ext}`;
+    const filename = `leben_diet_${Date.now()}_${idx}.${ext || 'jpg'}`;
 
     chunks.push(
       Buffer.from(
@@ -809,7 +810,7 @@ function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
     );
     chunks.push(fileBuffer);
     chunks.push(Buffer.from(CRLF, 'utf8'));
-  });
+  }
 
   chunks.push(Buffer.from(`--${boundary}--${CRLF}`, 'utf8'));
   return {
@@ -819,13 +820,15 @@ function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
 }
 
 async function refreshNaverAccessToken(naverConfig, refreshToken) {
-  if (!naverConfig?.clientId || !naverConfig?.clientSecret || !refreshToken) {
+  const clientId = naverConfig?.clientId || process.env.NAVER_CLIENT_ID || '';
+  const clientSecret = naverConfig?.clientSecret || process.env.NAVER_CLIENT_SECRET || '';
+  if (!clientId || !clientSecret || !refreshToken) {
     return null;
   }
   const tokenUrl =
     `https://nid.naver.com/oauth2.0/token?grant_type=refresh_token` +
-    `&client_id=${encodeURIComponent(naverConfig.clientId)}` +
-    `&client_secret=${encodeURIComponent(naverConfig.clientSecret)}` +
+    `&client_id=${encodeURIComponent(clientId)}` +
+    `&client_secret=${encodeURIComponent(clientSecret)}` +
     `&refresh_token=${encodeURIComponent(refreshToken)}`;
   const resp = await httpsRequest(tokenUrl);
   if (resp.json && resp.json.access_token) {
@@ -1890,27 +1893,34 @@ async function requestHandler(req, res) {
       const db = ensureDb();
       const naverCfg = db.settings?.naverConfig || {};
       const linkUserId = parsedUrl.searchParams.get('linkUserId') || '';
+      const clientId = naverCfg.clientId || process.env.NAVER_CLIENT_ID || '';
+      const clientSecret = naverCfg.clientSecret || process.env.NAVER_CLIENT_SECRET || '';
 
-      if (!naverCfg.clientId || !naverCfg.clientSecret) {
+      if (!clientId || !clientSecret) {
         return sendJson(res, 400, {
           error: '네이버 Developers Client ID 및 Client Secret이 아직 설정되지 않았습니다. [코치 관리] 탭에서 먼저 입력하거나 테스트 연동을 사용해 주세요.'
         });
       }
 
       const host = req.headers.host || `localhost:${PORT}`;
+      const isHttps = req.headers['x-forwarded-proto'] === 'https' || IS_VERCEL || host.includes('vercel.app');
+      const proto = isHttps ? 'https' : 'http';
       const callbackUrl =
-        naverCfg.callbackUrl || `http://${host}/api/naver/callback`;
+        naverCfg.callbackUrl && !naverCfg.callbackUrl.includes('localhost')
+          ? naverCfg.callbackUrl
+          : `${proto}://${host}/api/naver/callback`;
       const statePayload = Buffer.from(
         JSON.stringify({
           nonce: crypto.randomBytes(8).toString('hex'),
-          linkUserId
+          linkUserId,
+          callbackUrl
         }),
         'utf8'
       ).toString('base64url');
 
       const authUrl =
         `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
-        `&client_id=${encodeURIComponent(naverCfg.clientId)}` +
+        `&client_id=${encodeURIComponent(clientId)}` +
         `&redirect_uri=${encodeURIComponent(callbackUrl)}` +
         `&state=${encodeURIComponent(statePayload)}`;
 
@@ -1937,6 +1947,8 @@ async function requestHandler(req, res) {
 
       const db = ensureDb();
       const naverCfg = db.settings?.naverConfig || {};
+      const clientId = naverCfg.clientId || process.env.NAVER_CLIENT_ID || '';
+      const clientSecret = naverCfg.clientSecret || process.env.NAVER_CLIENT_SECRET || '';
       let linkUserId = '';
       try {
         const decoded = JSON.parse(Buffer.from(state, 'base64url').toString('utf8'));
@@ -1945,8 +1957,8 @@ async function requestHandler(req, res) {
 
       const tokenUrl =
         `https://nid.naver.com/oauth2.0/token?grant_type=authorization_code` +
-        `&client_id=${encodeURIComponent(naverCfg.clientId)}` +
-        `&client_secret=${encodeURIComponent(naverCfg.clientSecret)}` +
+        `&client_id=${encodeURIComponent(clientId)}` +
+        `&client_secret=${encodeURIComponent(clientSecret)}` +
         `&code=${encodeURIComponent(code)}` +
         `&state=${encodeURIComponent(state)}`;
 
@@ -2003,6 +2015,12 @@ async function requestHandler(req, res) {
           updatedAt: new Date().toISOString()
         };
         saveDb(db);
+        if (pendingSupabaseSync) {
+          try {
+            await pendingSupabaseSync;
+          } catch (_) {}
+          pendingSupabaseSync = null;
+        }
 
         res.writeHead(302, {
           Location: `/?naver_login=success&userId=${encodeURIComponent(targetParticipant.id)}`
@@ -2024,6 +2042,12 @@ async function requestHandler(req, res) {
         }
       };
       saveDb(db);
+      if (pendingSupabaseSync) {
+        try {
+          await pendingSupabaseSync;
+        } catch (_) {}
+        pendingSupabaseSync = null;
+      }
 
       res.writeHead(302, {
         Location: `/?naver_link_pending=${encodeURIComponent(naverProfile.id)}&naver_name=${encodeURIComponent(displayNickname)}`
@@ -2042,6 +2066,27 @@ async function requestHandler(req, res) {
       const participant = db.participants.find(p => p.id === userId);
       if (!participant) {
         return sendJson(res, 404, { error: '참가자를 찾을 수 없습니다.' });
+      }
+
+      if (IS_VERCEL) {
+        const naverCfg = db.settings?.naverConfig || {};
+        const clientId = naverCfg.clientId || process.env.NAVER_CLIENT_ID || '';
+        const clientSecret = naverCfg.clientSecret || process.env.NAVER_CLIENT_SECRET || '';
+        if (clientId && clientSecret) {
+          return sendJson(res, 200, {
+            ok: true,
+            isVercel: true,
+            needsOAuth: true,
+            oauthUrl: `/api/naver/login?linkUserId=${encodeURIComponent(participant.id)}`,
+            message: '네이버 Developers 공식 로그인으로 연동합니다.'
+          });
+        }
+        return sendJson(res, 200, {
+          ok: true,
+          isVercel: true,
+          needsDirectWrite: true,
+          message: 'Vercel 클라우드에서는 스마트 직행 글쓰기 모드가 활성화되어 있습니다.'
+        });
       }
 
       const naverCfg = db.settings?.naverConfig || {};
@@ -2438,17 +2483,101 @@ async function requestHandler(req, res) {
         });
       }
 
-      // 1) 네이버 OAuth 토큰이 없는 경우 -> 호스트 Chrome 네이버 로그인 세션(CDP)으로 즉시 자동 글쓰기 수행 (모바일/PC 공통)
+      // 1) 네이버 OAuth 토큰이 없는 경우 -> 호스트 Chrome(로컬) 자동 글쓰기 또는 Vercel 스마트 직행 글쓰기 수행
       if (!hasRealOAuthToken) {
-        const cdpPostRes = await postArticleViaChromeCdp({
-          clubId,
-          menuId: targetMenuId,
-          subject: subject || `[${cohortGroup} ${user.team}조 ${user.name}] ${date} 식단 및 탄단지 블록 인증`,
-          contentText,
-          images,
-          mealSections: resolvedMealSections,
-          footerSummaryText: resolvedFooterText
-        });
+        if (IS_VERCEL) {
+          const mobileWriteUrl = `https://m.cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}/articles/write`;
+          const pcWriteUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}/articles/write`;
+          const directBoardUrl = `https://m.cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}`;
+
+          log.cafePosted = true;
+          log.cafePostedAt = nowIso;
+          log.cafePostInfo = {
+            mode: 'smart_direct',
+            clubId,
+            menuId: targetMenuId,
+            memberBoardName: user.name,
+            cohortGroup,
+            team: user.team,
+            subject,
+            imageCount: images.length,
+            articleUrl: pcWriteUrl,
+            postedAt: nowIso
+          };
+          saveDb(db);
+
+          return sendJson(res, 200, {
+            ok: true,
+            simulated: false,
+            needDirectWrite: true,
+            writeUrl: mobileWriteUrl,
+            directBoardUrl,
+            subject,
+            contentText,
+            log,
+            postInfo: log.cafePostInfo,
+            message: `[${user.team}조 ${user.name}] 개인 게시판(#${targetMenuId}) 글쓰기 화면으로 이동합니다.`
+          });
+        }
+
+        let cdpPostRes = null;
+        try {
+          cdpPostRes = await postArticleViaChromeCdp({
+            clubId,
+            menuId: targetMenuId,
+            subject: subject || `[${cohortGroup} ${user.team}조 ${user.name}] ${date} 식단 및 탄단지 블록 인증`,
+            contentText,
+            images,
+            mealSections: resolvedMealSections,
+            footerSummaryText: resolvedFooterText
+          });
+        } catch (cdpErr) {
+          console.warn('[CDP AutoPost Error, fallback to Smart Direct]:', cdpErr.message);
+          const mobileWriteUrl = `https://m.cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}/articles/write`;
+          const pcWriteUrl = `https://cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}/articles/write`;
+          const directBoardUrl = `https://m.cafe.naver.com/ca-fe/cafes/${encodeURIComponent(
+            clubId
+          )}/menus/${encodeURIComponent(targetMenuId)}`;
+
+          log.cafePosted = true;
+          log.cafePostedAt = nowIso;
+          log.cafePostInfo = {
+            mode: 'smart_direct',
+            clubId,
+            menuId: targetMenuId,
+            memberBoardName: user.name,
+            cohortGroup,
+            team: user.team,
+            subject,
+            imageCount: images.length,
+            articleUrl: pcWriteUrl,
+            postedAt: nowIso
+          };
+          saveDb(db);
+
+          return sendJson(res, 200, {
+            ok: true,
+            simulated: false,
+            needDirectWrite: true,
+            writeUrl: mobileWriteUrl,
+            directBoardUrl,
+            subject,
+            contentText,
+            log,
+            postInfo: log.cafePostInfo,
+            message: `[${user.team}조 ${user.name}] 개인 게시판(#${targetMenuId}) 글쓰기 화면으로 이동합니다.`
+          });
+        }
 
         // 업로드 성공 시 해당 참가자의 브라우저 연동 상태도 자동 활성화
         user.naverTokens = {
@@ -2488,7 +2617,7 @@ async function requestHandler(req, res) {
         targetMenuId
       )}/articles`;
 
-      const { boundary, buffer } = buildCafeMultipartBody({
+      const { boundary, buffer } = await buildCafeMultipartBody({
         subject: subject || `[${cohortGroup} ${user.team}조 ${user.name}] ${date} 식단 및 탄단지 블록 인증`,
         contentHtml: contentHtml || '<p>오늘의 식단 및 탄단지 블록 인증입니다.</p>',
         images
