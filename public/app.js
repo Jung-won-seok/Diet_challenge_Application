@@ -2388,6 +2388,89 @@ function renderAdminTab(container) {
       </div>
     </section>
 
+    <section class="card" id="supabaseConfigCard" style="border:1.5px solid #3ECF8E;">
+      <div class="card-header">
+        <div>
+          <div class="section-eyebrow" style="color:#10B981;">SUPABASE CLOUD POSTGRESQL & STORAGE</div>
+          <div class="card-title" style="display:flex;align-items:center;gap:8px;">
+            <span>⚡ Supabase 클라우드 DB & 식단 사진 스토리지 연동</span>
+          </div>
+          <div class="card-subtitle">
+            정규화된 <strong>7개 PostgreSQL 테이블</strong>(<code>app_settings</code>, <code>participants</code>, <code>daily_logs</code>, <code>meals</code>, <code>team_reports</code>, <code>mission_logs</code>, <code>penalties</code>) 및 <strong><code>meal-photos</code> 스토리지 버킷</strong>에 데이터를 영구 저장합니다.
+          </div>
+        </div>
+        <span class="tag ${AppState.db.serverInfo?.supabase?.connected ? 'tag-ok' : 'tag-warn'}">
+          ${
+            AppState.db.serverInfo?.supabase?.connected
+              ? '● Supabase 연결됨'
+              : AppState.db.serverInfo?.supabase?.configured
+              ? '연결 대기/확인 필요'
+              : '로컬 파일 모드'
+          }
+        </span>
+      </div>
+
+      ${
+        AppState.db.serverInfo?.supabase?.tableCounts
+          ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+              <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.28);padding:10px;border-radius:12px;text-align:center;">
+                <div style="font-size:11px;color:var(--text-tertiary);font-weight:700;">participants</div>
+                <div style="font-size:18px;font-weight:800;color:var(--emerald-text);">${AppState.db.serverInfo.supabase.tableCounts.participants ?? 0}명</div>
+              </div>
+              <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.28);padding:10px;border-radius:12px;text-align:center;">
+                <div style="font-size:11px;color:var(--text-tertiary);font-weight:700;">daily_logs</div>
+                <div style="font-size:18px;font-weight:800;color:var(--emerald-text);">${AppState.db.serverInfo.supabase.tableCounts.daily_logs ?? 0}건</div>
+              </div>
+              <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.28);padding:10px;border-radius:12px;text-align:center;">
+                <div style="font-size:11px;color:var(--text-tertiary);font-weight:700;">meals (식단·블럭)</div>
+                <div style="font-size:18px;font-weight:800;color:var(--emerald-text);">${AppState.db.serverInfo.supabase.tableCounts.meals ?? 0}끼니</div>
+              </div>
+            </div>`
+          : ''
+      }
+
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">
+            PostgreSQL Connection URI (<code>DATABASE_URL</code> 또는 <code>POSTGRES_URL</code>)
+          </label>
+          <input type="password" class="input-field" id="cfgSupabaseDbUrl" placeholder="postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">
+              Supabase Project URL (<code>SUPABASE_URL</code>)
+            </label>
+            <input type="text" class="input-field" id="cfgSupabaseUrl" placeholder="https://xxxx.supabase.co" value="${AppState.db.serverInfo?.supabase?.supabaseUrl || ''}" />
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:4px;">
+              Service Role / Anon Key (<code>SUPABASE_SERVICE_ROLE_KEY</code>)
+            </label>
+            <input type="password" class="input-field" id="cfgSupabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." />
+          </div>
+        </div>
+      </div>
+
+      ${
+        AppState.db.serverInfo?.supabase?.lastError
+          ? `<div style="font-size:12px;color:var(--danger);background:var(--danger-soft);padding:10px 12px;border-radius:10px;margin-bottom:10px;">
+              ⚠️ 최근 DB 메시지: ${AppState.db.serverInfo.supabase.lastError}
+            </div>`
+          : ''
+      }
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="btn btn-primary" id="btnConnectAndInitSupabase" style="background:#10B981;color:#FFFFFF;border:none;flex:1;">
+          ⚡ 7개 테이블 자동 생성 & 현재 데이터 즉시 동기화
+        </button>
+        <button type="button" class="btn btn-secondary" id="btnCopySupabaseSchemaSql">
+          ${Icons.copy}
+          <span>SQL 스키마(DDL) 복사</span>
+        </button>
+      </div>
+    </section>
+
     <section class="card">
       <div class="card-header">
         <div>
@@ -2747,6 +2830,53 @@ function bindAdminEvents() {
     await apiRequest('/api/admin/update', 'POST', { participants: updated });
     showToast('참가자 명단 및 개인 카페 게시판 번호가 저장되었습니다');
     await loadState();
+  });
+
+  document.getElementById('btnConnectAndInitSupabase')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btnConnectAndInitSupabase');
+    const databaseUrl = document.getElementById('cfgSupabaseDbUrl')?.value.trim();
+    const supabaseUrl = document.getElementById('cfgSupabaseUrl')?.value.trim();
+    const supabaseKey = document.getElementById('cfgSupabaseKey')?.value.trim();
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Supabase 7개 테이블 생성 및 데이터 동기화 중...';
+    }
+    try {
+      const payload = {};
+      if (databaseUrl) payload.databaseUrl = databaseUrl;
+      if (supabaseUrl) payload.supabaseUrl = supabaseUrl;
+      if (supabaseKey) payload.supabaseKey = supabaseKey;
+
+      const res = await apiRequest('/api/supabase/config', 'POST', payload);
+      if (res.status?.connected) {
+        showToast('✅ Supabase PostgreSQL 7개 테이블 생성 및 데이터 연동이 완료되었습니다!');
+      } else {
+        showToast(res.status?.lastError || 'Supabase 연결 정보를 확인해 주세요');
+      }
+      await loadState();
+    } catch (err) {
+      showToast(err.message || 'Supabase 연동 중 오류가 발생했습니다');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '⚡ 7개 테이블 자동 생성 & 현재 데이터 즉시 동기화';
+      }
+    }
+  });
+
+  document.getElementById('btnCopySupabaseSchemaSql')?.addEventListener('click', async () => {
+    try {
+      const res = await apiRequest('/api/supabase/status', 'GET');
+      if (res.schemaSql) {
+        await copyToClipboard(
+          res.schemaSql,
+          'Supabase 7개 테이블 + Storage 버킷 SQL 스키마가 복사되었습니다! (Supabase SQL Editor에 붙여넣기 가능)'
+        );
+      }
+    } catch (err) {
+      showToast('SQL 스키마 복사에 실패했습니다');
+    }
   });
 
   document.getElementById('btnClearAllLogs')?.addEventListener('click', async () => {

@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const { spawn, exec } = require('node:child_process');
+const supabaseDb = require('./lib/supabase-db');
 
 const PORT = process.env.PORT || 3000;
 const IS_VERCEL = Boolean(process.env.VERCEL);
@@ -418,7 +419,9 @@ function ensureDb() {
   }
 }
 
-function saveDb(data) {
+let pendingSupabaseSync = null;
+
+function saveLocalDbOnly(data) {
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -427,8 +430,26 @@ function saveDb(data) {
     fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2), 'utf8');
     fs.renameSync(tmpPath, DB_PATH);
   } catch (err) {
-    console.warn('saveDb warning:', err.message);
+    console.warn('saveLocalDbOnly warning:', err.message);
   }
+}
+
+function saveDb(data) {
+  saveLocalDbOnly(data);
+  if (supabaseDb.resolveCredentials().isConfigured) {
+    pendingSupabaseSync = supabaseDb
+      .syncStateToSupabase(data)
+      .then(res => {
+        if (res && res.ok) {
+          saveLocalDbOnly(data);
+        }
+        return res;
+      })
+      .catch(err => {
+        console.warn('[SupabaseDB] 저장 동기화 경고:', err.message);
+      });
+  }
+  return pendingSupabaseSync;
 }
 
 function readJsonBody(req) {
@@ -452,7 +473,13 @@ function readJsonBody(req) {
   });
 }
 
-function sendJson(res, status, payload) {
+async function sendJson(res, status, payload) {
+  if (pendingSupabaseSync) {
+    try {
+      await pendingSupabaseSync;
+    } catch (_) {}
+    pendingSupabaseSync = null;
+  }
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store'
@@ -721,6 +748,29 @@ function parseDataUrlImage(dataUrl) {
   return null;
 }
 
+// Data URL 또는 원격(Supabase Storage CDN) URL을 Buffer로 변환하는 비동기 헬퍼
+async function resolveImageSourceToBuffer(src) {
+  if (!src || typeof src !== 'string') return null;
+  const parsed = parseDataUrlImage(src);
+  if (parsed) return parsed;
+  if (src.startsWith('http://') || src.startsWith('https://')) {
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) return null;
+      const mimeType = resp.headers.get('content-type') || 'image/jpeg';
+      const arrBuf = await resp.arrayBuffer();
+      const buffer = Buffer.from(arrBuf);
+      let ext = 'jpg';
+      if (mimeType.includes('png')) ext = 'png';
+      else if (mimeType.includes('webp')) ext = 'webp';
+      else if (mimeType.includes('gif')) ext = 'gif';
+      return { mimeType, buffer, ext };
+    } catch (_) {
+      return null;
+    }
+  }
+  return null;
+}
 // 네이버 카페 글쓰기 API용 multipart/form-data 바디 생성
 function buildCafeMultipartBody({ subject, contentHtml, images = [] }) {
   const boundary = `----LebenZoneBoundary${crypto.randomBytes(12).toString('hex')}`;
@@ -1166,7 +1216,7 @@ async function postArticleViaChromeCdp({
         const secFiles = [];
         const rawImgs = Array.isArray(sec.images) ? sec.images : [];
         for (let i = 0; i < rawImgs.length; i++) {
-          const parsed = parseDataUrlImage(rawImgs[i]);
+          const parsed = await resolveImageSourceToBuffer(rawImgs[i]);
           if (parsed && parsed.buffer) {
             const tmpPath = path.join(
               os.tmpdir(),
@@ -1177,16 +1227,17 @@ async function postArticleViaChromeCdp({
             secFiles.push(tmpPath);
           }
         }
+        const mType = sec.mealType || sec.type || '식단';
         sectionTempGroups.push({
-          mealType: sec.mealType || '식단',
-          headerText: sec.headerText || `[${sec.mealType || '식단'}]`,
+          mealType: mType,
+          headerText: sec.headerText || `[${mType}]`,
           blockText: sec.blockText || '',
           files: secFiles
         });
       }
     } else {
       for (let i = 0; i < images.length; i++) {
-        const parsed = parseDataUrlImage(images[i]);
+        const parsed = await resolveImageSourceToBuffer(images[i]);
         if (parsed && parsed.buffer) {
           const tmpPath = path.join(os.tmpdir(), `leben_cafe_${Date.now()}_${i}.${parsed.ext || 'png'}`);
           fs.writeFileSync(tmpPath, parsed.buffer);
@@ -1746,15 +1797,89 @@ async function requestHandler(req, res) {
   }
 
   try {
+    // API 요청 시 Supabase가 설정되어 있다면 최신 클라우드 DB 상태를 로컬 캐시와 동기화
+    if (pathname.startsWith('/api/') && supabaseDb.resolveCredentials().isConfigured) {
+      try {
+        const localFallback = ensureDb();
+        const remoteDb = await supabaseDb.loadStateFromSupabase(localFallback);
+        if (remoteDb) {
+          saveLocalDbOnly(remoteDb);
+        }
+      } catch (sbErr) {
+        console.warn('[SupabaseDB] 요청 전 상태 동기화 경고:', sbErr.message);
+      }
+    }
+
     if (pathname === '/api/state' && req.method === 'GET') {
       const db = ensureDb();
+      const sbStatus = await supabaseDb.getSupabaseStatus();
       return sendJson(res, 200, {
         ...sanitizeDbForClient(db),
         serverInfo: {
           todayKst: getKstDateString(0),
           lanIps: getLanAddresses(),
-          port: PORT
+          port: PORT,
+          supabase: sbStatus
         }
+      });
+    }
+
+    // ========================================================================
+    // Supabase 클라우드 DB 상태 조회 / 연결 설정 / 수동 동기화 API
+    // ========================================================================
+    if (pathname === '/api/supabase/status' && req.method === 'GET') {
+      const sbStatus = await supabaseDb.getSupabaseStatus();
+      let schemaSql = '';
+      try {
+        schemaSql = fs.readFileSync(supabaseDb.SCHEMA_SQL_PATH, 'utf8');
+      } catch (_) {}
+      return sendJson(res, 200, {
+        ok: true,
+        status: sbStatus,
+        schemaSql
+      });
+    }
+
+    if (pathname === '/api/supabase/config' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const { supabaseUrl, supabaseKey, databaseUrl } = body;
+      supabaseDb.updateSupabaseCredentials({ supabaseUrl, supabaseKey, databaseUrl });
+
+      const db = ensureDb();
+      await supabaseDb.ensureSchemaViaPg();
+      const syncRes = await supabaseDb.syncStateToSupabase(db);
+      const sbStatus = await supabaseDb.getSupabaseStatus();
+
+      return sendJson(res, 200, {
+        ok: true,
+        syncRes,
+        status: sbStatus,
+        db: sanitizeDbForClient(db)
+      });
+    }
+
+    if (pathname === '/api/supabase/sync' && req.method === 'POST') {
+      const body = await readJsonBody(req);
+      const direction = body.direction || 'push'; // 'push' (로컬->Supabase) | 'pull' (Supabase->로컬)
+      let db = ensureDb();
+
+      if (direction === 'pull') {
+        const remote = await supabaseDb.loadStateFromSupabase(db);
+        if (remote) {
+          saveLocalDbOnly(remote);
+          db = remote;
+        }
+      } else {
+        await supabaseDb.ensureSchemaViaPg();
+        await supabaseDb.syncStateToSupabase(db);
+        saveLocalDbOnly(db);
+      }
+
+      const sbStatus = await supabaseDb.getSupabaseStatus();
+      return sendJson(res, 200, {
+        ok: true,
+        status: sbStatus,
+        db: sanitizeDbForClient(db)
       });
     }
 
@@ -2213,24 +2338,28 @@ async function requestHandler(req, res) {
         const mealOrder = ['아침', '점심', '저녁', '간식'];
         const mealEmoji = { 아침: '☀️', 점심: '🌤️', 저녁: '🌙', 간식: '🍎' };
         const sortedMeals = [...log.meals].sort(
-          (a, b) => mealOrder.indexOf(a.mealType) - mealOrder.indexOf(b.mealType)
+          (a, b) => mealOrder.indexOf(a.type || a.mealType) - mealOrder.indexOf(b.type || b.mealType)
         );
         let totC = 0;
         let totP = 0;
         let totF = 0;
         for (const m of sortedMeals) {
-          const c = Number(m.carbBlocks) || 0;
-          const p = Number(m.proteinBlocks) || 0;
-          const f = Number(m.fatBlocks) || 0;
+          const c = Number(m.carb ?? m.carbBlocks) || 0;
+          const p = Number(m.protein ?? m.proteinBlocks) || 0;
+          const f = Number(m.fat ?? m.fatBlocks) || 0;
           totC += c;
           totP += p;
           totF += f;
-          const mType = m.mealType || '식단';
+          const mType = m.type || m.mealType || '식단';
           const emoji = mealEmoji[mType] || '🍽️';
           const titleLabel = mType === '간식' ? '간식' : `${mType} 식단`;
           const rawList =
-            Array.isArray(m.imageList) && m.imageList.length > 0
+            Array.isArray(m.photos) && m.photos.length > 0
+              ? m.photos
+              : Array.isArray(m.imageList) && m.imageList.length > 0
               ? m.imageList
+              : m.photoDataUrl
+              ? [m.photoDataUrl]
               : m.imageData
               ? [m.imageData]
               : [];
@@ -2242,6 +2371,7 @@ async function requestHandler(req, res) {
             blockLines.push(`▶ ${mType} 메뉴 : ${m.memo}`);
           }
           resolvedMealSections.push({
+            type: mType,
             mealType: mType,
             headerText: `━━━━━━━━━━━━━━━━━━━━\n${emoji} [${titleLabel}]${m.time ? ` (${m.time})` : ''}`,
             images: rawList,
@@ -2249,15 +2379,13 @@ async function requestHandler(req, res) {
           });
         }
         if (!resolvedFooterText) {
-          const tC = user.targetBlocks?.carb ?? 9;
-          const tP = user.targetBlocks?.protein ?? 9;
-          const tF = user.targetBlocks?.fat ?? 9;
+          const tgt = typeof user.targetBlocks === 'number' ? user.targetBlocks : Number(user.targetBlocks?.carb ?? 11);
           resolvedFooterText = [
             `━━━━━━━━━━━━━━━━━━━━`,
             `📊 [오늘 하루 총 섭취 탄·단·지 블럭 합계]`,
-            `• 탄수화물 : 총 ${Math.round(totC * 10) / 10}블럭 (목표 ${tC}블럭)`,
-            `• 단 백 질 : 총 ${Math.round(totP * 10) / 10}블럭 (목표 ${tP}블럭)`,
-            `• 지    방 : 총 ${Math.round(totF * 10) / 10}블럭 (목표 ${tF}블럭)`,
+            `• 탄수화물 : 총 ${Math.round(totC * 10) / 10}블럭 (목표 ${tgt}블럭)`,
+            `• 단 백 질 : 총 ${Math.round(totP * 10) / 10}블럭 (목표 ${tgt}블럭)`,
+            `• 지    방 : 총 ${Math.round(totF * 10) / 10}블럭 (목표 ${tgt}블럭)`,
             `━━━━━━━━━━━━━━━━━━━━`
           ].join('\n');
         }
