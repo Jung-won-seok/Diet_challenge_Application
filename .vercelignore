@@ -1,0 +1,6 @@
+data/chrome-naver-profile
+node_modules
+.git
+.env*.local
+*.log
+*.tmp
