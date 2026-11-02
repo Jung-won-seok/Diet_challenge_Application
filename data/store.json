@@ -383,23 +383,62 @@
   ],
   "dailyLogs": [
     {
+      "id": "log_u1_2026-11-02",
+      "userId": "u1",
+      "date": "2026-11-02",
+      "kakaoReported": true,
+      "kakaoReportedAt": "2026-11-02T02:21:45.405Z",
+      "cafePosted": true,
+      "cafePostedAt": "2026-11-02T02:21:50.478Z",
+      "cafePostInfo": {
+        "mode": "smart_direct",
+        "team": 1,
+        "clubId": "31811778",
+        "menuId": "7",
+        "subject": "[2026년 2기 1조 맴버1] 2026.11.02 식단 및 탄단지 블록 인증",
+        "postedAt": "2026-11-02T02:21:50.478Z",
+        "articleUrl": "https://cafe.naver.com/ca-fe/cafes/31811778/menus/7/articles/write",
+        "imageCount": 0,
+        "cohortGroup": "2026년 2기",
+        "memberBoardName": "맴버1"
+      },
+      "meals": [
+        {
+          "id": "m_1793586100321_51im",
+          "type": "아침",
+          "mealType": "아침",
+          "time": "08:30",
+          "carb": 3,
+          "carbBlocks": 3,
+          "protein": 3,
+          "proteinBlocks": 3,
+          "fat": 3,
+          "fatBlocks": 3,
+          "memo": "고구마 150g, 닭가슴살 100g, 아몬드",
+          "photoDataUrl": "",
+          "photos": [],
+          "imageData": "",
+          "imageList": []
+        }
+      ]
+    },
+    {
       "id": "log_u1_2026-11-01",
       "userId": "u1",
       "date": "2026-11-01",
       "kakaoReported": true,
       "kakaoReportedAt": "2026-11-01T08:18:20.804Z",
       "cafePosted": true,
-      "cafePostedAt": "2026-11-01T14:23:45.297Z",
+      "cafePostedAt": "2026-11-01T16:36:19.011Z",
       "cafePostInfo": {
-        "mode": "api",
+        "mode": "smart_direct",
         "team": 1,
         "clubId": "31811778",
         "menuId": "7",
-        "subject": "[존다챌린지/1조/맴버1] 11/01 식단 인증 (탄13·단12·지12 / 목표 14블럭)",
-        "postedAt": "2026-11-01T14:23:45.297Z",
-        "articleId": "8112",
-        "articleUrl": "https://cafe.naver.com/ca-fe/cafes/31811778/menus/7",
-        "imageCount": 6,
+        "subject": "테스트 제목",
+        "postedAt": "2026-11-01T16:36:19.011Z",
+        "articleUrl": "https://cafe.naver.com/ca-fe/cafes/31811778/menus/7/articles/write",
+        "imageCount": 0,
         "cohortGroup": "2026년 2기",
         "memberBoardName": "맴버1"
       },
@@ -923,6 +962,15 @@
     }
   ],
   "teamReports": [
+    {
+      "id": "tr_1_2026-11-02",
+      "team": 1,
+      "date": "2026-11-02",
+      "reportedByUserId": "u1",
+      "reportedByName": "맴버1",
+      "comment": "1조 식단 보고 완료",
+      "reportedAt": "2026-11-02T02:21:57.315Z"
+    },
     {
       "id": "tr_1_2026-10-27",
       "team": 1,

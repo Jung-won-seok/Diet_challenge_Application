@@ -353,25 +353,24 @@ function renderDietTab(container) {
   const boardMenuId = user.cafeMenuId || naverCfg.teamMenuIds?.[String(user.team)] || naverCfg.defaultMenuId || '';
 
   container.innerHTML = `
-    <!-- 0. 네이버 로그인 후 카페(나의 카페라떼 · 2026년 2기) 내 이름 선택 & 연동 배너 (iOS Liquid Glass) -->
-    <div style="background:linear-gradient(135deg, rgba(255,255,255,0.78) 0%, rgba(236,253,245,0.58) 100%);backdrop-filter:blur(28px) saturate(195%);-webkit-backdrop-filter:blur(28px) saturate(195%);border:1px solid rgba(255,255,255,0.88);box-shadow:0 12px 32px -6px rgba(3,199,90,0.12), inset 0 1.5px 1px rgba(255,255,255,0.95);border-radius:22px;padding:13px 16px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--text-primary);">
+    <!-- 0. 네이버 연동 배너 (iOS Liquid Glass) -->
+    <div style="background:linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(236,253,245,0.65) 100%);backdrop-filter:blur(28px) saturate(195%);-webkit-backdrop-filter:blur(28px) saturate(195%);border:1px solid rgba(255,255,255,0.88);box-shadow:0 10px 28px -6px rgba(3,199,90,0.12), inset 0 1.5px 1px rgba(255,255,255,0.95);border-radius:20px;padding:12px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--text-primary);">
       <div style="display:flex;align-items:center;gap:11px;">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg, #06D666 0%, #03B954 100%);box-shadow:0 4px 12px rgba(3,199,90,0.32), inset 0 1px 0.5px rgba(255,255,255,0.45);color:#FFFFFF;font-weight:900;font-size:17px;flex-shrink:0;">N</span>
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg, #06D666 0%, #03B954 100%);box-shadow:0 3px 10px rgba(3,199,90,0.3), inset 0 1px 0.5px rgba(255,255,255,0.45);color:#FFFFFF;font-weight:900;font-size:16px;flex-shrink:0;">N</span>
         <div>
-          <div style="font-size:11px;font-weight:800;color:#059669;letter-spacing:0.03em;">
-            ${cafeDisplayName} (${naverCfg.cafeSlug || 'mycaffelatte'}) · ${activeCohort}
+          <div style="font-size:11px;font-weight:700;color:#059669;letter-spacing:0.02em;">
+            ${cafeDisplayName} · ${activeCohort}
           </div>
-          <div style="font-size:13.5px;font-weight:800;color:var(--text-primary);margin-top:1px;">
-            ${
-              user.hasNaverToken
-                ? `${user.team}조 [${user.name}] 카페 게시판(#${boardMenuId}) 연동됨 (${user.naverNickname || '네이버회원'})`
-                : `현재 선택: ${user.team}조 [${user.name}] (게시판 #${boardMenuId}) · 네이버 로그인 필요`
-            }
+          <div style="font-size:14px;font-weight:800;color:var(--text-primary);margin-top:1px;">
+            ${user.team}조 ${user.name}
+            <span style="font-size:11.5px;font-weight:600;color:var(--text-secondary);margin-left:5px;">
+              ${user.hasNaverToken ? `· 카페 연동 완료` : '· 미연동'}
+            </span>
           </div>
         </div>
       </div>
-      <button type="button" class="btn btn-sm" id="btnHeroNaverCafeLink" style="background:linear-gradient(180deg, #06D666 0%, #03B954 100%);color:#FFFFFF;font-weight:800;padding:9px 14px;font-size:12.5px;border-radius:999px;box-shadow:0 4px 14px rgba(3,199,90,0.28), inset 0 1px 0.5px rgba(255,255,255,0.45);white-space:nowrap;">
-        ${user.hasNaverToken ? '내 이름/카페 연동 변경' : '네이버 로그인 후 카페에 연동하기'}
+      <button type="button" class="btn btn-sm" id="btnHeroNaverCafeLink" style="background:linear-gradient(180deg, #06D666 0%, #03B954 100%);color:#FFFFFF;font-weight:700;padding:8px 14px;font-size:12px;border-radius:999px;box-shadow:0 3px 10px rgba(3,199,90,0.25);white-space:nowrap;">
+        ${user.hasNaverToken ? '연동 설정' : '네이버 연동'}
       </button>
     </div>
 
@@ -379,9 +378,8 @@ function renderDietTab(container) {
     <section class="card-hero">
       <div class="card-header" style="margin-bottom:12px;">
         <div>
-          <div class="section-eyebrow">STEP 1 · DAILY ZONE REPORT</div>
-          <div class="card-title">${activeCohort} · ${user.team}조 ${user.name} · 오늘 총 섭취 블록</div>
-          <div class="card-subtitle">${AppState.selectedDate.replace(/-/g, '.')} · 일일 목표 각 ${target}블록 · 카페 개인 게시판 #${boardMenuId}</div>
+          <div class="card-title">오늘의 탄·단·지 블록</div>
+          <div class="card-subtitle">일일 목표 각 ${target}블록 (${AppState.selectedDate.replace(/-/g, '.')})</div>
         </div>
         <span class="tag ${isOver ? 'tag-danger' : meals.length > 0 ? 'tag-volt' : 'tag-neutral'}">
           ${isOver ? '목표 초과' : meals.length > 0 ? '기록 완료' : '입력 대기'}
@@ -403,14 +401,14 @@ function renderDietTab(container) {
           <button type="button" class="cert-switch-btn ${log.kakaoReported ? 'done' : ''}" id="btnToggleKakao">
             <div>
               <div class="cert-switch-label">${user.team}조 공간 식단 보고</div>
-              <div class="cert-switch-sub">${log.kakaoReported ? '우리 조 공간 등록됨' : '식단 등록 시 자동 완료'}</div>
+              <div class="cert-switch-sub">${log.kakaoReported ? '등록 완료' : '식단 등록 시 자동 반영'}</div>
             </div>
             <span class="check-circle">${log.kakaoReported ? Icons.check : ''}</span>
           </button>
           <button type="button" class="cert-switch-btn ${log.cafePosted ? 'done' : ''}" id="btnToggleCafe">
             <div>
               <div class="cert-switch-label">네이버 카페 업로드</div>
-              <div class="cert-switch-sub">${log.cafePosted ? '카페 작성 완료됨' : '전문복사 탭에서 진행'}</div>
+              <div class="cert-switch-sub">${log.cafePosted ? '업로드 완료' : '카페 업로드 탭에서 등록'}</div>
             </div>
             <span class="check-circle">${log.cafePosted ? Icons.check : ''}</span>
           </button>
@@ -418,13 +416,12 @@ function renderDietTab(container) {
       </div>
     </section>
 
-    <!-- 2. 아침 · 점심 · 저녁 사진(다중 첨부) & 블록 입력 카드 -->
+    <!-- 2. 식단 등록 카드 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">MEAL & PHOTO UPLOAD</div>
-          <div class="card-title">${mf.editingId ? `${mf.type} 식단 수정` : '아침 · 점심 · 저녁 식단 올리기'}</div>
-          <div class="card-subtitle">끼니별 사진(여러 장 가능)과 먹은 블록 수를 등록하면 ${user.team}조 공간에 바로 공유됩니다</div>
+          <div class="card-title">${mf.editingId ? `${mf.type} 식단 수정` : '식단 등록'}</div>
+          <div class="card-subtitle">${mf.type} 식단 사진과 탄·단·지 블록을 입력하세요</div>
         </div>
         ${
           mf.editingId
@@ -450,10 +447,10 @@ function renderDietTab(container) {
         <input type="file" id="mealPhotoInput" accept="image/*" multiple style="display:none;" />
         <div style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--text-primary);">
           ${Icons.camera}
-          <span>${mf.type} 식단 사진 선택 (2장 이상 다중 선택 가능)</span>
+          <span>${mf.type} 식단 사진 (다중 선택 가능)</span>
         </div>
         <div style="font-size:12px;color:var(--text-tertiary);margin-top:3px;">
-          현재 첨부된 사진 ${currentPhotos.length}장 · 터치하여 앨범에서 사진을 추가하세요
+          ${currentPhotos.length > 0 ? `첨부된 사진 ${currentPhotos.length}장` : '터치하여 앨범에서 사진을 추가하세요'}
         </div>
       </div>
 
@@ -474,18 +471,17 @@ function renderDietTab(container) {
           : ''
       }
 
-      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:8px;margin-bottom:14px;">
-        <button type="button" class="btn btn-secondary btn-sm" id="btnAddSamplePhotos">샘플 사진 2장 자동 첨부</button>
-        ${
-          currentPhotos.length > 0
-            ? `<button type="button" class="btn btn-danger btn-sm" id="btnClearAllPhotos">사진 전체 비우기</button>`
-            : ''
-        }
-      </div>
+      ${
+        currentPhotos.length > 0
+          ? `<div style="display:flex;justify-content:flex-end;margin-top:8px;margin-bottom:14px;">
+              <button type="button" class="btn btn-danger btn-sm" id="btnClearAllPhotos">사진 비우기</button>
+            </div>`
+          : '<div style="margin-bottom:12px;"></div>'
+      }
 
       <!-- 빠른 블록 선택 -->
       <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:8px;">
-        ${mf.type} 섭취 블록 선택 (또는 하루 총 블록을 한 번에 입력해도 됩니다)
+        ${mf.type} 섭취 블록
       </div>
       <div class="preset-strip">
         ${[2, 3, 3.5, 4, 5, 11, 14]
@@ -533,18 +529,15 @@ function renderDietTab(container) {
       </div>
 
       <button type="button" class="btn btn-primary btn-block" id="btnSaveMeal">
-        ${mf.editingId ? `${mf.type} 식단 수정 완료` : `${mf.type} 식단 저장 및 ${user.team}조 공간에 올리기`}
+        ${mf.editingId ? `${mf.type} 식단 수정 완료` : `${mf.type} 식단 저장`}
       </button>
     </section>
 
-    <!-- 3. 오늘 내가 올린 아침·점심·저녁 식단 확인 및 다음 단계 이동 -->
+    <!-- 3. 오늘 등록한 식단 목록 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">MY UPLOADED MEALS</div>
-          <div class="card-title">오늘 등록한 식단 (${meals.length}끼 · 총 탄${formatBlock(totals.carb)} 단${formatBlock(
-    totals.protein
-  )} 지${formatBlock(totals.fat)})</div>
+          <div class="card-title">오늘 등록한 식단 (${meals.length})</div>
         </div>
       </div>
 
@@ -601,12 +594,12 @@ function renderDietTab(container) {
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;">
         <button type="button" class="btn btn-secondary" id="btnGoTeamSpace">
-          <span>${user.team}조 공간 확인</span>
+          <span>${user.team}조 공간</span>
           ${Icons.arrowRight}
         </button>
         <button type="button" class="btn btn-primary" id="btnGoCafeShare" style="background:#03C75A;border-color:#03C75A;">
           ${Icons.naver}
-          <span>${user.team}조 카페 업로드</span>
+          <span>카페 업로드</span>
           ${Icons.arrowRight}
         </button>
       </div>
@@ -966,13 +959,12 @@ async function renderTeamsTab(container) {
         .join('')}
     </div>
 
-    <!-- 조원 4명 식단 & 블록 현황 -->
+    <!-- 조원 식단 현황 -->
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">TEAM 0${activeTeam} DIET SPACE</div>
-          <div class="card-title">${activeTeam}조 오늘의 식단 공간 (${uploadedMemberCount}/${teamMembers.length}명 완료)</div>
-          <div class="card-subtitle">조원 4명이 오늘 먹은 아침·점심·저녁 사진과 총 탄단지 블록 수입니다</div>
+          <div class="card-title">${activeTeam}조 식단 현황 (${uploadedMemberCount}/${teamMembers.length}명 완료)</div>
+          <div class="card-subtitle">조원들의 오늘 식단 사진과 탄·단·지 블록입니다</div>
         </div>
       </div>
 
@@ -981,21 +973,20 @@ async function renderTeamsTab(container) {
       </div>
     </section>
 
-    <!-- 식단 담당 전용: 4명이 올린 사진과 블록 수를 전체 20명 공간에 보고 -->
+    <!-- 식단 담당: 전체 20명 공간에 보고 -->
     <section class="card-hero">
       <div class="card-header" style="margin-bottom:10px;">
         <div>
-          <div class="section-eyebrow">STEP 2 · DIET MANAGER REPORT</div>
-          <div class="card-title">${activeTeam}조 식단 담당 (${dietManager ? dietManager.name : '담당자'}) 전체방 보고</div>
-          <div class="card-subtitle">기존에 카톡을 캡처해서 전체방에 올리던 과정을 버튼 하나로 처리합니다</div>
+          <div class="card-title">${activeTeam}조 식단 보고 (${dietManager ? dietManager.name : '담당자'})</div>
+          <div class="card-subtitle">조원 식단 현황을 전체 보고방에 등록합니다</div>
         </div>
         <span class="tag ${existingReport ? 'tag-volt' : 'tag-neutral'}">
-          ${existingReport ? '전체방 보고 완료' : '보고 대기'}
+          ${existingReport ? '보고 완료' : '보고 대기'}
         </span>
       </div>
 
       <div style="margin-bottom:12px;">
-        <input type="text" class="input-field" id="teamReportCommentInput" style="background:var(--bg-carbon-sub);border-color:rgba(255,255,255,0.1);color:#fff;" placeholder="전체 20명 방에 남길 한줄 코멘트" value="${
+        <input type="text" class="input-field" id="teamReportCommentInput" style="background:var(--bg-carbon-sub);border-color:rgba(255,255,255,0.1);color:#fff;" placeholder="코멘트 입력 (선택)" value="${
           existingReport?.comment ||
           `${activeTeam}조 4명(${teamMembers.map(m => m.name).join(', ')}) 오늘 식단 사진 및 탄단지 블록 보고합니다.`
         }" />
@@ -1003,13 +994,13 @@ async function renderTeamsTab(container) {
 
       <button type="button" class="btn btn-volt btn-block" id="btnSubmitTeamReport" style="margin-bottom:12px;">
         ${Icons.send}
-        <span>${activeTeam}조 4명 사진·블록을 '전체 20명 보고방'에 올리기</span>
+        <span>${activeTeam}조 식단 전체방에 보고하기</span>
       </button>
 
-      <!-- 카톡 전체 단톡방에도 바로 올릴 수 있는 4인 합본 보드 이미지 & 텍스트 -->
+      <!-- 4인 취합 보드 이미지 -->
       <div style="background:var(--bg-carbon-sub);padding:14px;border-radius:14px;">
         <div style="font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:8px;">
-          ${activeTeam}조 4명 합본 보고 이미지 (카톡 전체방 공유 겸용)
+          ${activeTeam}조 취합 이미지
         </div>
         <div class="summary-canvas-wrap" style="margin:0 0 10px 0;">
           <canvas id="teamReportCanvas"></canvas>
@@ -1017,11 +1008,11 @@ async function renderTeamsTab(container) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <button type="button" class="btn btn-secondary btn-sm" id="btnDownloadTeamBoard">
             ${Icons.download}
-            <span>4명 합본 이미지 저장</span>
+            <span>이미지 저장</span>
           </button>
           <button type="button" class="btn btn-secondary btn-sm" id="btnCopyTeamSummaryText">
             ${Icons.copy}
-            <span>4명 블록 요약문구 복사</span>
+            <span>요약 복사</span>
           </button>
         </div>
       </div>
@@ -1156,10 +1147,9 @@ function renderAll20MemberSpace(container, modeSwitchHtml, date, participants, t
         <section class="card">
           <div class="card-header">
             <div>
-              <div class="section-eyebrow">TEAM 0${teamNum} REPORT · 식단담당 ${dietManager ? dietManager.name : ''}</div>
-              <div class="card-title">${teamNum}조 4인 식단 & 블록 보고</div>
+              <div class="card-title">${teamNum}조 식단 현황</div>
               <div class="card-subtitle">${
-                report ? report.comment : '아직 식단 담당의 전체방 공식 보고가 등록되지 않았습니다 (실시간 현황 표시 중)'
+                report ? report.comment : '실시간 등록 현황'
               }</div>
             </div>
             <span class="tag ${report ? 'tag-ok' : 'tag-neutral'}">
@@ -1173,7 +1163,7 @@ function renderAll20MemberSpace(container, modeSwitchHtml, date, participants, t
 
           <div style="margin-top:12px;display:flex;justify-content:flex-end;">
             <button type="button" class="btn btn-secondary btn-sm" data-jump-team-space="${teamNum}">
-              ${teamNum}조 공간으로 이동해서 보고하기
+              ${teamNum}조 공간 이동
             </button>
           </div>
         </section>
@@ -1187,11 +1177,10 @@ function renderAll20MemberSpace(container, modeSwitchHtml, date, participants, t
     <section class="card-hero">
       <div class="card-header" style="margin-bottom:6px;">
         <div>
-          <div class="section-eyebrow">ALL 20 MEMBERS LOUNGE</div>
-          <div class="card-title">전체 20명 식단 보고 공간</div>
-          <div class="card-subtitle">각 조의 식단 담당이 취합해 올린 1조~5조(20명) 전체 식단 사진과 블록 현황입니다</div>
+          <div class="card-title">전체 식단 보고 공간</div>
+          <div class="card-subtitle">1조~5조 전체 식단 사진과 탄·단·지 블록입니다</div>
         </div>
-        <span class="tag tag-volt">${todayReports.length} / 5개 조 보고 완료</span>
+        <span class="tag tag-volt">${todayReports.length} / 5개 조 완료</span>
       </div>
     </section>
 
@@ -1291,19 +1280,16 @@ async function renderShareTab(container) {
     : '';
 
   container.innerHTML = `
-    <!-- 0. 네이버 로그인 + 카페 개인 게시판 자동 글쓰기 API 연동 -->
+    <!-- 네이버 카페 식단 업로드 카드 -->
     <section class="card-hero">
       <div class="card-header" style="margin-bottom:12px;">
         <div>
-          <div class="section-eyebrow" style="color:#03C75A;">NAVER CAFE OPEN API · ${activeCohort} · ${user.team}조</div>
           <div class="card-title" style="display:flex;align-items:center;gap:7px;">
             ${Icons.naver}
-            <span>[${user.team}조 ${user.name}] 카페 게시판 자동 업로드</span>
+            <span>네이버 카페 식단 업로드</span>
           </div>
           <div class="card-subtitle">
-            오늘의 아침·점심·저녁 식단 사진과 탄단지 블록을 <strong>${
-              naverCfg.cafeName || '나의 카페라떼'
-            } &gt; ${activeCohort} &gt; ${user.name} 게시판(#${targetMenuId})</strong>에 바로 등록합니다
+            [${user.team}조 ${user.name}] 개인 게시판에 아침·점심·저녁 사진과 블록을 등록합니다
           </div>
         </div>
         <span class="tag ${log.cafePosted ? 'tag-volt' : 'tag-neutral'}">
@@ -1313,188 +1299,60 @@ async function renderShareTab(container) {
 
       ${postReceiptHtml}
 
-      <!-- 현재 네이버 계정 연동 및 대상 카페/개인 게시판 상태 요약 -->
-      <div style="background:var(--bg-carbon-sub);border:1px solid rgba(255,255,255,0.08);border-radius:13px;padding:12px 14px;margin-bottom:12px;font-size:12.5px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.07);gap:8px;flex-wrap:wrap;">
-          <div>
-            <span style="color:#9CA3AF;">1. 네이버 로그인 & 내 이름 연동 :</span>
-            <strong style="color:${isNaverLinked ? '#4ADE80' : '#FBBF24'};margin-left:6px;">
-              ${
-                isNaverLinked
-                  ? `[${user.team}조 ${user.name}] 연동됨 (${user.naverNickname || user.name}${user.naverId?.startsWith('sim_') ? ' · 테스트계정' : ''})`
-                  : `[${user.team}조 ${user.name}] 선택됨 · 네이버 미연동`
-              }
-            </strong>
-          </div>
-          <button type="button" class="btn btn-secondary btn-sm" id="btnOpenNaverLinkModal" style="padding:5px 11px;font-size:11.5px;background:#03C75A;color:#fff;border:none;font-weight:800;">
-            ${isNaverLinked ? '내 이름/계정 변경' : '네이버 로그인 후 카페에 연동하기'}
-          </button>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
-          <div>
-            <span style="color:#9CA3AF;">2. 업로드 대상 카페 게시판 :</span>
-            <strong style="color:#FFFFFF;margin-left:6px;">
-              ${
-                clubId
-                  ? `${naverCfg.cafeName || '나의 카페라떼'} (${ activeCohort }) &gt; [${user.team}조] ${user.name} 게시판 (menuId: ${
-                      targetMenuId || '미지정'
-                    })`
-                  : '아직 카페 번호(clubId)가 설정되지 않았습니다'
-              }
-            </strong>
-          </div>
-          <div style="display:flex;gap:6px;">
-            <a href="${directBoardUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="padding:4px 10px;font-size:11.5px;">
-              <span>내 게시판 열기</span>
-              ${Icons.external}
-            </a>
-            <button type="button" class="btn btn-secondary btn-sm" id="btnJumpCafeApiConfig" style="padding:4px 10px;font-size:11.5px;">
-              카페 설정
-            </button>
-          </div>
-        </div>
+      <!-- 식단 카드 미리보기 -->
+      <div style="font-size:12px;font-weight:700;color:#9CA3AF;margin-bottom:6px;">
+        식단 카드 미리보기
       </div>
-
-      <!-- 자동 등록할 게시글 제목 및 첨부 옵션 -->
-      <div style="margin-bottom:10px;">
-        <label style="font-size:11.5px;font-weight:700;color:#9CA3AF;display:block;margin-bottom:4px;">
-          카페에 등록될 게시글 제목 (수정 가능)
-        </label>
-        <input type="text" class="input-field" id="cafeApiSubjectInput" value="${cafeTitle}" style="background:var(--bg-carbon-sub);border-color:rgba(255,255,255,0.12);color:#FFFFFF;font-weight:700;font-size:13px;" />
-      </div>
-
-      <div style="margin-bottom:12px;">
-        <label style="font-size:11.5px;font-weight:700;color:#9CA3AF;display:block;margin-bottom:4px;">
-          업로드 포맷 및 사진 첨부 방식 선택
-        </label>
-        <select class="input-field" id="cafeApiAttachMode" style="background:var(--bg-carbon-sub);border-color:rgba(255,255,255,0.12);color:#FFFFFF;font-size:12.5px;">
-          <option value="meals_by_section">끼니별(아침·점심·저녁) 구별 사진 + 각 사진 밑에 끼니별 블럭 표시 (권장 · ${individualPhotos.length}장)</option>
-          <option value="both">일체형 요약 카드 + 끼니별(아침·점심·저녁) 구별 사진 및 블럭 (${individualPhotos.length + 1}장)</option>
-          <option value="summary_only">아침·점심·저녁+끼니별 블럭 일체형 요약 카드 1장만 첨부</option>
-        </select>
-      </div>
-
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button type="button" class="btn btn-block" id="btnAutoPostNaverCafe" style="background:#03C75A;color:#FFFFFF;font-weight:800;padding:15px 16px;font-size:15px;touch-action:manipulation;cursor:pointer;">
-          ${Icons.naver}
-          <span>[${activeCohort} · ${user.team}조 ${user.name}] 카페 게시판(#${targetMenuId})에 자동 등록</span>
-        </button>
-        <div id="cafeAutoPostLiveStatus" style="display:none;padding:12px 14px;border-radius:14px;background:rgba(3,199,90,0.14);border:1px solid rgba(3,199,90,0.38);color:#A7F3D0;font-size:12.5px;font-weight:600;line-height:1.5;"></div>
-        <button type="button" class="btn btn-secondary btn-block btn-sm" id="btnSimulatePostNaverCafe" style="touch-action:manipulation;">
-          <span>API 키 입력 전 테스트(시뮬레이션) 모드로 [${user.name}] 게시판 업로드 체험하기</span>
-        </button>
-      </div>
-      <div style="font-size:11.5px;color:#9CA3AF;margin-top:8px;line-height:1.45;">
-        * 현재 <strong>https://cafe.naver.com/mycaffelatte (${activeCohort})</strong>의 앞에서부터 4명씩 <code>1조~5조</code> 및 개인 게시판(<code>#${targetMenuId}</code>) 구조가 자동 연동되어 있습니다.<br/>
-        * 모바일에서도 버튼 터치 시 <strong>☀️ 아침 식단 ➔ 아침 사진 ➔ 아침 탄·단·지 블럭 ➔ 🌤️ 점심 식단 ➔ 점심 사진 ➔ 점심 탄·단·지 블럭 ➔ 🌙 저녁 식단 ➔ 저녁 사진 ➔ 저녁 탄·단·지 블럭</strong> 순서로 구별되어 자동 작성됩니다.
-      </div>
-    </section>
-
-    <!-- 1. 수동 복사 방식: 아침·점심·저녁 사진 + 끼니별 탄단지 블록 통합 이미지 복사 (Ctrl+V 1번으로 끝!) -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <div class="section-eyebrow">METHOD 1 · ONE-PASTE IMAGE COPY (수동 붙여넣기용)</div>
-          <div class="card-title">아침·점심·저녁 구별 사진 + 끼니별 블럭 통째로 복사</div>
-          <div class="card-subtitle">직접 카페에 붙여넣고 싶을 때 사용하세요. 카페 본문에서 <strong>Ctrl+V(붙여넣기) 한 번으로 끼니별 사진과 그 밑의 끼니별 블럭 수가 통째로 삽입</strong>됩니다!</div>
-        </div>
-        <span class="tag ${log.cafePosted ? 'tag-ok' : 'tag-neutral'}">
-          ${log.cafePosted ? '카페 인증완료' : '작성 전'}
-        </span>
-      </div>
-
-      <!-- 게시글 제목 복사 -->
-      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:5px;">1. 카페 게시글 제목 복사</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
-        <input type="text" class="input-field" readonly value="${cafeTitle}" style="font-weight:700;font-size:13px;" />
-        <button type="button" class="btn btn-secondary" id="btnCopyTitleOnly" style="white-space:nowrap;">
-          ${Icons.copy}
-          <span>제목 복사</span>
-        </button>
-      </div>
-
-      <!-- 카페 본문에 그대로 들어갈 화이트 일체형 시트 미리보기 -->
-      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:6px;">
-        2. 카페 본문 붙여넣기용 미리보기 (아침·점심·저녁 구별 + 각 사진 밑에 끼니별 탄단지 블럭 표시)
-      </div>
-      <div class="summary-canvas-wrap" style="background:#FFFFFF;">
+      <div class="summary-canvas-wrap" style="background:#FFFFFF;border-radius:14px;overflow:hidden;margin-bottom:14px;">
         <canvas id="summaryCardCanvas"></canvas>
       </div>
 
-      <!-- 원클릭 이미지 복사 & 네이버 카페 바로 이동 버튼 -->
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
-        <button type="button" class="btn btn-primary btn-block" id="btnCopyCombinedImageAndOpenCafe" style="padding:15px 16px;font-size:15px;">
-          ${Icons.copy}
-          <span>위 식단사진+블록 통째로 복사 후 네이버 카페 이동</span>
-          ${Icons.external}
-        </button>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <button type="button" class="btn btn-secondary" id="btnCopyCombinedImageOnly">
+      <!-- 게시글 제목 (수정 가능) -->
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <label style="font-size:11.5px;font-weight:700;color:#9CA3AF;">게시글 제목</label>
+          <button type="button" class="btn btn-secondary btn-sm" id="btnCopyTitleOnly" style="padding:2px 8px;font-size:11px;">
             ${Icons.copy}
-            <span>이동 없이 클립보드 복사만</span>
-          </button>
-          <button type="button" class="btn btn-outline" id="btnDownloadCardImg">
-            ${Icons.download}
-            <span>이미지 파일로 저장</span>
+            <span>제목 복사</span>
           </button>
         </div>
-      </div>
-    </section>
-
-    <!-- 2. 사진과 텍스트(글자)를 따로 붙여넣고 싶을 때 (2단계 복사) -->
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <div class="section-eyebrow">METHOD 2 · SEPARATE PHOTO & TEXT PASTE</div>
-          <div class="card-title">아침·점심·저녁 구별 텍스트 및 사진 개별 복사</div>
-          <div class="card-subtitle">카페 본문에 <strong>[① 사진 복사 → Ctrl+V]</strong> 한 뒤, 그 밑에 <strong>[② 끼니별 블럭 글 복사 → Ctrl+V]</strong> 하는 방식입니다</div>
-        </div>
+        <input type="text" class="input-field" id="cafeApiSubjectInput" value="${cafeTitle}" style="background:var(--bg-carbon-sub);border-color:rgba(255,255,255,0.12);color:#FFFFFF;font-weight:700;font-size:13px;" />
       </div>
 
-      <!-- 숨김 캔버스: 아침·점심·저녁 사진만 모은 콜라주 -->
-      <canvas id="photosOnlyCanvas" style="display:none;"></canvas>
-
-      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:8px;">
-        ① 식단 사진 클립보드 복사 (카페 에디터에서 Ctrl+V 하면 사진이 올라갑니다)
-      </div>
-      <button type="button" class="btn btn-primary btn-block" id="btnCopyPhotosOnly" style="margin-bottom:10px;">
-        ${Icons.copy}
-        <span>① 아침·점심·저녁 사진+끼니별 블럭 시트 복사하기 (Ctrl+V용)</span>
-      </button>
-
-      ${
-        individualPhotos.length > 0
-          ? `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
-              ${individualPhotos
-                .map(
-                  (p, idx) => `
-                <button type="button" class="btn btn-outline btn-sm" data-copy-single-photo="${idx}">
-                  ${Icons.copy}
-                  <span>${p.label}만 복사</span>
-                </button>
-              `
-                )
-                .join('')}
-            </div>`
-          : ''
-      }
-
-      <div style="font-size:12px;font-weight:700;color:var(--text-tertiary);margin-bottom:6px;">
-        ② 아침·점심·저녁 구별 + 끼니별 탄·단·지 블럭 텍스트
-      </div>
-      <div class="copy-preview" style="margin-top:0;">${cafeBottomText}</div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
-        <button type="button" class="btn btn-primary" id="btnCopyBottomTextOnly">
-          ${Icons.copy}
-          <span>② 끼니별 블럭 텍스트 복사</span>
+      <!-- 메인 원클릭 액션 버튼 -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button type="button" class="btn btn-block" id="btnAutoPostNaverCafe" style="background:#03C75A;color:#FFFFFF;font-weight:800;padding:15px 16px;font-size:15px;touch-action:manipulation;cursor:pointer;border-radius:14px;box-shadow:0 4px 16px rgba(3,199,90,0.3);">
+          ${Icons.naver}
+          <span>카페 게시판에 식단 등록하기 ↗</span>
         </button>
-        <a href="${directBoardUrl}" target="_blank" rel="noopener" class="btn btn-outline" id="btnOpenCafeDirect">
-          <span>내 카페 게시판 열기</span>
-          ${Icons.external}
-        </a>
+        <div id="cafeAutoPostLiveStatus" style="display:none;padding:12px 14px;border-radius:14px;background:rgba(3,199,90,0.14);border:1px solid rgba(3,199,90,0.38);color:#A7F3D0;font-size:12.5px;font-weight:600;line-height:1.5;"></div>
       </div>
+
+      <!-- 보조 버튼 (카드 복사 / 이미지 저장) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnCopyCombinedImageOnly">
+          ${Icons.copy}
+          <span>식단 카드 복사</span>
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" id="btnDownloadCardImg">
+          ${Icons.download}
+          <span>이미지 저장</span>
+        </button>
+      </div>
+
+      <!-- 선택사항: 텍스트 형식 보기 & 복사 (접이식) -->
+      <details style="margin-top:14px;background:var(--bg-carbon-sub);border-radius:12px;padding:10px 14px;border:1px solid rgba(255,255,255,0.08);">
+        <summary style="font-size:12px;font-weight:700;color:#9CA3AF;cursor:pointer;">
+          텍스트 형식으로 보기 및 복사 (선택사항)
+        </summary>
+        <div class="copy-preview" style="margin-top:8px;font-size:12px;">${cafeBottomText}</div>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btnCopyBottomTextOnly">
+            ${Icons.copy}
+            <span>텍스트 복사</span>
+          </button>
+        </div>
+      </details>
     </section>
   `;
 
@@ -1937,7 +1795,6 @@ function renderPenaltyTab(container) {
     <section class="card-hero">
       <div class="card-header" style="margin-bottom:14px;">
         <div>
-          <div class="section-eyebrow">PENALTY TRACKER</div>
           <div class="card-title">패널티 및 벌금 현황</div>
           <div class="card-subtitle">1회당 ${formatWon(unitAmount)} · 개인 최대 ${maxCount}회(${formatWon(
     maxCount * unitAmount
@@ -1988,7 +1845,6 @@ function renderPenaltyTab(container) {
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">MEMBER STATUS</div>
           <div class="card-title">개인별 누적 패널티</div>
         </div>
       </div>
@@ -2131,7 +1987,6 @@ function renderAdminTab(container) {
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">AUTO SETTLEMENT</div>
           <div class="card-title">일일 마감 위반자 자동 스캔</div>
           <div class="card-subtitle">${AppState.selectedDate.replace(
             /-/g,
@@ -2164,7 +2019,6 @@ function renderAdminTab(container) {
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">MANUAL PENALTY</div>
           <div class="card-title">패널티 수동 부과 및 취소</div>
         </div>
       </div>
@@ -2208,15 +2062,12 @@ function renderAdminTab(container) {
     <section class="card" id="naverCafeConfigCard" style="border:1.5px solid #03C75A;">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow" style="color:#03C75A;">NAVER LOGIN & CAFE COHORT SYNC</div>
           <div class="card-title" style="display:flex;align-items:center;gap:7px;">
             ${Icons.naver}
-            <span>네이버 카페 기수(2026년 2기) · 참가자 게시판 연동 설정</span>
+            <span>네이버 카페 및 기수 연동 설정</span>
           </div>
           <div class="card-subtitle">
-            현재 <strong>${settings.naverConfig?.cafeName || '나의 카페라떼'} (${
-              settings.cafeUrl || 'https://cafe.naver.com/mycaffelatte'
-            })</strong>의 기수별 멤버 게시판을 불러와 <strong>앞에서부터 4명씩 1조~5조</strong>로 자동 편성합니다.
+            ${settings.naverConfig?.cafeName || '나의 카페라떼'} 기수별 멤버 게시판을 불러와 4명씩 1조~5조로 자동 편성합니다.
           </div>
         </div>
         <span class="tag ${settings.naverConfig?.clubId ? 'tag-ok' : 'tag-neutral'}">
@@ -2227,7 +2078,7 @@ function renderAdminTab(container) {
       <!-- 카페 기수 & 20인 게시판 실시간 동기화 박스 -->
       <div style="background:rgba(3,199,90,0.09);border:1.5px solid rgba(3,199,90,0.35);border-radius:13px;padding:13px;margin-bottom:14px;">
         <div style="font-size:12.5px;font-weight:800;color:#03C75A;margin-bottom:6px;">
-          🔄 네이버 카페 기수(예: 2026년 2기) 멤버 게시판 불러오기 (앞에서부터 4명씩 1~5조 자동 편성)
+          🔄 네이버 카페 기수별 멤버 게시판 불러오기
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
           <input type="text" class="input-field" id="syncCafeUrlInput" value="${
@@ -2244,45 +2095,11 @@ function renderAdminTab(container) {
               .join('')}
           </select>
           <button type="button" class="btn btn-primary btn-sm" id="btnSyncCafeCohortLive" style="background:#03C75A;border-color:#03C75A;white-space:nowrap;">
-            카페에서 기수·명단 동기화
+            카페에서 명단 동기화
           </button>
         </div>
         <div style="font-size:11.5px;color:var(--text-secondary);line-height:1.45;">
-          * 카페 좌측 메뉴의 기수 그룹(예: <strong>2026년 2기</strong> 하위 <code>맴버1 ~ 맴버20</code>)을 읽어와 앞에서부터 4명씩 <strong>1조(1~4번), 2조(5~8번), 3조(9~12번), 4조(13~16번), 5조(17~20번)</strong>로 자동 배정하고 각 멤버의 개인 게시판 번호(<code>menuId</code>)를 연결합니다.
-        </div>
-      </div>
-
-      <!-- 3분 연동 가이드 (접기/펼치기) -->
-      <details style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:11px 13px;margin-bottom:14px;font-size:12.5px;line-height:1.55;">
-        <summary style="font-weight:800;cursor:pointer;color:var(--text-primary);">
-          📘 내 테스트 카페(mycaffelatte) 연동 & 추후 본 카페 전환 가이드 (클릭하여 펼치기)
-        </summary>
-        <div style="margin-top:10px;color:var(--text-secondary);display:flex;flex-direction:column;gap:6px;">
-          <div><strong>1단계 (카페 기수·명단 자동 동기화)</strong> : 위 입력창에 카페 주소(<code>https://cafe.naver.com/mycaffelatte</code>)를 넣고 <strong>[카페에서 기수·명단 동기화]</strong>를 누르면 <code>clubId(31811778)</code>와 기수별 멤버 게시판 번호가 자동으로 세팅됩니다.</div>
-          <div><strong>2단계 (네이버 Developers 앱 등록)</strong> : <a href="https://developers.naver.com/apps/#/register" target="_blank" rel="noopener" style="color:#03C75A;font-weight:700;text-decoration:underline;">네이버 개발자 센터</a>에서 애플리케이션 등록 → 사용 API에 <strong>[네이버 로그인]</strong>과 <strong>[카페]</strong>(카페 글쓰기)를 체크합니다.</div>
-          <div><strong>3단계 (URL 및 키 등록)</strong> : 서비스 URL에 <code>http://localhost:3000</code>, Callback URL에 <code>http://localhost:3000/api/naver/callback</code>을 입력한 뒤 발급된 <strong>Client ID</strong>와 <strong>Client Secret</strong>을 아래에 저장하세요.</div>
-          <div><strong>4단계 (나중에 본 카페로 바꿀 때)</strong> : 위 카페 주소창에 실제 크로스핏 카페 주소만 넣고 <strong>[카페에서 기수·명단 동기화]</strong>를 누르면 코드 수정 없이 1초 만에 전환됩니다!</div>
-        </div>
-      </details>
-
-      <!-- 스마트 카페 URL 추출기 -->
-      <div style="background:rgba(3,199,90,0.05);border:1px solid rgba(3,199,90,0.22);border-radius:12px;padding:12px;margin-bottom:14px;">
-        <div style="font-size:12px;font-weight:800;color:#03C75A;margin-bottom:6px;">
-          🔍 개별 게시판 주소(URL)에서 clubId · menuId 번호 추출기
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-          <input type="text" class="input-field" id="cafeUrlExtractInput" placeholder="예: https://cafe.naver.com/f-e/cafes/31811778/menus/7" style="flex:1;min-width:210px;background:#fff;" />
-          <select class="input-field" id="cafeExtractTargetSelect" style="width:130px;background:#fff;">
-            <option value="default">공통 게시판에 적용</option>
-            <option value="1">1조 대표 게시판</option>
-            <option value="2">2조 대표 게시판</option>
-            <option value="3">3조 대표 게시판</option>
-            <option value="4">4조 대표 게시판</option>
-            <option value="5">5조 대표 게시판</option>
-          </select>
-          <button type="button" class="btn btn-primary btn-sm" id="btnExtractCafeIds" style="background:#03C75A;border-color:#03C75A;white-space:nowrap;">
-            번호 자동 추출
-          </button>
+          * 카페 메뉴 순서대로 4명씩 1조~5조로 자동 배정하고 개인 게시판 번호를 연결합니다.
         </div>
       </div>
 
@@ -2369,17 +2186,16 @@ function renderAdminTab(container) {
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">CHALLENGE CONFIG</div>
-          <div class="card-title">주간 미션 및 기본 카페 주소 설정</div>
+          <div class="card-title">주간 미션 및 챌린지 설정</div>
         </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         <div>
-          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">챌린지 타이틀</label>
+          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">챌린지 명칭</label>
           <input type="text" class="input-field" id="cfgChallengeName" value="${settings.challengeName || ''}" />
         </div>
         <div>
-          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">네이버 카페 이동 주소 (글쓰기 게시판 URL)</label>
+          <label style="font-size:12px;color:var(--text-tertiary);font-weight:700;display:block;margin-bottom:4px;">네이버 카페 기본 주소</label>
           <input type="text" class="input-field" id="cfgCafeUrl" value="${settings.cafeUrl || ''}" />
         </div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;">
@@ -2403,9 +2219,8 @@ function renderAdminTab(container) {
     <section class="card">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow">PARTICIPANTS · ${settings.naverConfig?.activeCohortGroup || '2026년 2기'}</div>
-          <div class="card-title">참가자 명단 · 카페 개인게시판(menuId) · 목표 블록 (${AppState.db.participants.length}명)</div>
-          <div class="card-subtitle">카페 메뉴 순서대로 앞에서부터 4명씩 1조, 2조, 3조, 4조, 5조로 편성되어 있습니다</div>
+          <div class="card-title">참가자 명단 및 목표 블록 (${AppState.db.participants.length}명)</div>
+          <div class="card-subtitle">4명씩 1조~5조로 편성되어 있습니다</div>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="btnAddParticipant">+ 인원 추가</button>
       </div>
@@ -2475,12 +2290,11 @@ function renderAdminTab(container) {
     <section class="card" id="supabaseConfigCard" style="border:1.5px solid #3ECF8E;">
       <div class="card-header">
         <div>
-          <div class="section-eyebrow" style="color:#10B981;">SUPABASE CLOUD POSTGRESQL & STORAGE</div>
           <div class="card-title" style="display:flex;align-items:center;gap:8px;">
-            <span>⚡ Supabase 클라우드 DB & 식단 사진 스토리지 연동</span>
+            <span>⚡ Supabase 클라우드 데이터베이스 연동</span>
           </div>
           <div class="card-subtitle">
-            정규화된 <strong>7개 PostgreSQL 테이블</strong>(<code>app_settings</code>, <code>participants</code>, <code>daily_logs</code>, <code>meals</code>, <code>team_reports</code>, <code>mission_logs</code>, <code>penalties</code>) 및 <strong><code>meal-photos</code> 스토리지 버킷</strong>에 데이터를 영구 저장합니다.
+            7개 PostgreSQL 테이블 및 <code>meal-photos</code> 스토리지 버킷에 데이터를 영구 저장합니다.
           </div>
         </div>
         <span class="tag ${AppState.db.serverInfo?.supabase?.connected ? 'tag-ok' : 'tag-warn'}">
@@ -3003,10 +2817,9 @@ function openUserSwitchModal(preselectUserId = null) {
     content.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
         <div>
-          <div class="section-eyebrow" style="color:#03C75A;">NAVER LOGIN & CAFE MEMBER LINK</div>
-          <h3 style="font-size:17.5px;font-weight:800;">네이버 로그인 후 카페에 연동하기</h3>
+          <h3 style="font-size:17.5px;font-weight:800;">참가자 선택 & 네이버 연동</h3>
           <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">
-            <strong>${naverCfg.cafeName || '나의 카페라떼'} (mycaffelatte)</strong>의 <strong>${activeCohort}</strong> 명단에서 내 이름을 선택해 연동하세요
+            ${naverCfg.cafeName || '나의 카페라떼'} · ${activeCohort} 명단에서 본인을 선택하세요
           </div>
         </div>
         <button type="button" class="btn btn-secondary btn-sm" id="btnCloseUserModal">닫기</button>
@@ -3015,7 +2828,7 @@ function openUserSwitchModal(preselectUserId = null) {
       <!-- 카페 기수(2026년 2기 / 2026년 1기) 선택 및 카페 실시간 명단 동기화 바 -->
       <div style="background:var(--bg-subtle);border:1px solid var(--border-hairline);border-radius:12px;padding:9px 11px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;">
-          <span style="color:#03C75A;font-weight:800;">카페 기수 :</span>
+          <span style="color:#03C75A;font-weight:800;">기수 :</span>
           <select id="modalCohortSelect" class="input-field" style="padding:4px 8px;font-size:12px;font-weight:800;width:auto;height:30px;">
             ${cohortOptions
               .map(
@@ -3028,13 +2841,13 @@ function openUserSwitchModal(preselectUserId = null) {
           </select>
         </div>
         <button type="button" class="btn btn-outline btn-sm" id="btnModalRefreshCafe" style="padding:4px 9px;font-size:11px;">
-          🔄 카페에서 최신 명단 새로고침
+          🔄 명단 동기화
         </button>
       </div>
 
-      <!-- STEP 1: 카페(2026년 2기)에서 내 이름 선택 (앞에서부터 4명씩 1~5조) -->
+      <!-- 참가자 선택 -->
       <div style="font-size:12px;font-weight:800;color:var(--text-secondary);margin-bottom:6px;">
-        STEP 1. 카페 [${activeCohort}]에서 내 이름 선택 (앞에서부터 4명씩 1조~5조)
+        1~5조 참가자 선택
       </div>
       <div style="max-height:235px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;padding-right:2px;border:1px solid var(--border-hairline);border-radius:12px;padding:10px;">
         ${[1, 2, 3, 4, 5]
@@ -3044,7 +2857,7 @@ function openUserSwitchModal(preselectUserId = null) {
             return `
               <div>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
-                  <span style="font-size:11.5px;font-weight:800;color:var(--text-primary);">${teamNum}조 <small style="color:var(--text-tertiary);font-weight:600;">(${teamRangeLabels[teamNum]})</small></span>
+                  <span style="font-size:11.5px;font-weight:800;color:var(--text-primary);">${teamNum}조</span>
                   <span style="font-size:10.5px;color:var(--text-tertiary);">${members.length}명</span>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
@@ -3058,7 +2871,7 @@ function openUserSwitchModal(preselectUserId = null) {
                         ${m.hasNaverToken ? Icons.naver : ''}
                         <span>${m.name}</span>
                       </span>
-                      <small style="opacity:0.78;font-size:10.5px;">게시판 #${m.cafeMenuId || '-'} · ${m.targetBlocks}B</small>
+                      <small style="opacity:0.78;font-size:10.5px;">${m.targetBlocks}B</small>
                     </button>
                   `
                     )
@@ -3070,33 +2883,27 @@ function openUserSwitchModal(preselectUserId = null) {
           .join('')}
       </div>
 
-      <!-- STEP 2: 선택한 내 이름에 네이버 로그인 & 카페 연동하기 -->
+      <!-- 선택한 참가자에 네이버 연동하기 -->
       <div style="background:rgba(3,199,90,0.09);border:1.5px solid rgba(3,199,90,0.4);border-radius:14px;padding:12px;margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div style="font-size:12.5px;font-weight:800;color:#03C75A;display:flex;align-items:center;gap:6px;">
             ${Icons.naver}
-            <span>STEP 2. 선택한 [${chosenUser.team}조 ${chosenUser.name}]에 네이버 로그인 연동</span>
+            <span>[${chosenUser.team}조 ${chosenUser.name}] 네이버 연동</span>
           </div>
           ${
             chosenUser.hasNaverToken
-              ? `<span style="font-size:11px;font-weight:800;color:#03C75A;">● 실제 네이버 연동됨 (${chosenUser.naverNickname || chosenUser.name})</span>`
-              : `<span style="font-size:11px;color:var(--text-tertiary);">미연동 (로그인 필요)</span>`
+              ? `<span style="font-size:11px;font-weight:800;color:#03C75A;">● 연동 완료 (${chosenUser.naverNickname || chosenUser.name})</span>`
+              : `<span style="font-size:11px;color:var(--text-tertiary);">미연동</span>`
           }
-        </div>
-
-        <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:8px;">
-          연동 대상 카페 게시판: <strong>${naverCfg.cafeName || '나의 카페라떼'} &gt; ${activeCohort} &gt; [${chosenUser.team}조] ${
-            chosenUser.name
-          } 게시판 (menuId: #${chosenUser.cafeMenuId || '-'})</strong>
         </div>
 
         <div style="display:flex;flex-direction:column;gap:6px;">
           <button type="button" class="btn btn-block" id="btnBrowserNaverLogin" style="background:#03C75A;color:#FFFFFF;font-weight:800;padding:13px;font-size:13.5px;">
             ${Icons.naver}
-            <span>네이버 로그인 후 카페 [${chosenUser.team}조 ${chosenUser.name}]에 즉시 연동하기</span>
+            <span>네이버 로그인 연동</span>
           </button>
           <div style="font-size:11px;color:#9CA3AF;line-height:1.4;text-align:center;">
-            * 버튼을 누르면 PC 화면 맨 앞에 네이버 로그인 창이 뜹니다. ID/PW 입력 또는 <strong>[QR코드 로그인]</strong>을 완료하시면 자동으로 창이 닫히며 연동됩니다.
+            * 로그인 완료 시 ${chosenUser.name} 님의 전용 게시판과 즉시 연결됩니다.
           </div>
 
           <div style="display:flex;gap:6px;margin-top:2px;">
